@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>VitD-Kinetik v1.17</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --line:#2d333b;
+    --fg:#e6edf3; --dim:#aab4be;
+    --amber:#f0a500; --blue:#58a6ff;
+    --red:#f08080; --green:#7ee2a8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:-apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;
+    display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 8px);
+    touch-action:none;
+  }
+  #bgfix{position:fixed;inset:0;background:var(--bg);z-index:-1}
+
+  header{display:flex;align-items:baseline;justify-content:space-between;flex:0 0 auto;padding:2px 2px 6px}
+  header h1{font-size:17px;font-weight:700;letter-spacing:.2px}
+  header h1 small{font-size:11px;color:var(--dim);font-weight:400;margin-left:6px}
+  #plateauHead{font-size:13px;color:var(--amber);font-variant-numeric:tabular-nums;
+    min-width:118px;text-align:right;font-weight:600}
+
+  #tabs{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;height:30px;margin-bottom:6px}
+  #viewDiary{flex:1 1 auto;display:none;flex-direction:column;min-height:0}
+  .din{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:38px;margin-bottom:6px}
+  .din input{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);
+    font-family:inherit;font-size:13px;padding:0 8px;min-width:0;-webkit-appearance:none}
+  #diDate{display:flex;align-items:center;justify-content:space-between;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--fg);font-size:13px;font-variant-numeric:tabular-nums;
+    padding:0 8px;touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}
+  #diDate *{pointer-events:none}
+  #diDate .arr{display:flex;flex-direction:column;line-height:7px;font-size:8px;color:var(--dim)}
+  .din button{background:#1c2128;border:1px solid var(--amber);border-radius:8px;color:var(--amber);
+    font-size:18px;font-weight:700;width:42px;font-family:inherit}
+  .dhead{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;font-size:10px;color:var(--dim);
+    padding:0 2px 4px}
+  .dhead span:last-child{width:42px}
+  #dlist{flex:1 1 auto;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+  .drow{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:34px;align-items:center;
+    border-bottom:1px solid var(--line);font-size:13px;font-variant-numeric:tabular-nums}
+  .drow button{background:none;border:none;color:var(--red,#f08080);font-size:15px;width:42px;font-family:inherit}
+  #dsum{flex:0 0 auto;height:34px;display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;border-top:1px solid var(--line)}
+  #dnote{flex:0 0 auto;font-size:9px;color:var(--dim);height:14px;overflow:hidden}
+  #dExp{background:none;border:1px solid var(--line);border-radius:6px;color:var(--dim);
+    font-size:10px;font-family:inherit;padding:3px 8px}
+  #ovl{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:50;
+    align-items:center;justify-content:center;padding:20px}
+  #ovl.show{display:flex}
+  #ovlBox{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    width:100%;max-width:420px;max-height:70vh;display:flex;flex-direction:column;padding:12px;gap:8px}
+  #ovlBox h2{font-size:13px;color:var(--fg)}
+  #ovlTxt{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg);
+    font-family:ui-monospace,monospace;font-size:11px;padding:8px;min-height:140px;resize:none}
+  #ovlClose{background:#1c2128;border:1px solid var(--amber);border-radius:8px;color:var(--amber);
+    font-size:13px;font-weight:600;font-family:inherit;height:36px}
+  #tabs button{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--dim);font-size:12px;font-weight:600;font-family:inherit;
+  }
+  #tabs button.on{color:var(--fg);border-color:var(--amber);background:#1c2128}
+
+  #toggles{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6px;height:26px;margin-bottom:6px}
+  #toggles button{
+    background:var(--panel);border:1px solid var(--line);border-radius:7px;
+    color:var(--dim);font-size:11px;font-weight:600;font-family:inherit;
+  }
+  #toggles button.on{color:#c9a0ff;border-color:#c9a0ff;background:#1c2128}
+  #toggles{grid-template-columns:1fr 1fr 1fr}
+  #tgStop.on{color:#f08080;border-color:#f08080}
+  #tgLoad.on{color:#f0a500;border-color:#f0a500}
+  footer.warn{color:#f08080;font-weight:600}
+
+  #chartWrap{flex:1 1 auto;min-height:150px;position:relative}
+  svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .axis{stroke:var(--line);stroke-width:1}
+  .gridline{stroke:var(--line);stroke-width:.5;opacity:.6}
+  .ticktext{fill:#aab4be;font-size:9.5px;font-variant-numeric:tabular-nums}
+  .zonelabel{font-size:8.5px}
+
+  #readouts{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0 6px}
+  .ro{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;height:48px;
+      display:flex;flex-direction:column;justify-content:center}
+  .ro .lab{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden}
+  .ro .val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .ro .val small{font-size:10px;font-weight:400;color:var(--dim)}
+
+  #controls{flex:0 0 auto;display:flex;flex-direction:column;gap:2px}
+  .ctl{height:40px;display:flex;flex-direction:column;justify-content:center}
+  .ctl.off{opacity:.35}
+  .ctl.off input[type=range]{pointer-events:none}
+  .ctl .row{display:flex;justify-content:space-between;align-items:baseline;height:16px}
+  .ctl .name{font-size:12px;color:var(--dim)}
+  .ctl .value{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
+      min-width:110px;text-align:right}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;
+    touch-action:pan-x;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:var(--amber);margin-top:-10px;border:2px solid var(--bg);
+    box-shadow:0 0 0 1px var(--line);
+  }
+  .ctl.c-c0 input[type=range]::-webkit-slider-thumb{background:var(--blue)}
+  .ctl.c-hwz input[type=range]::-webkit-slider-thumb{background:#c9a0ff}
+  .ctl.c-extra input[type=range]::-webkit-slider-thumb{background:#7ee2a8}
+  .ctl.c-load input[type=range]::-webkit-slider-thumb{background:#f0a500}
+
+  footer{flex:0 0 auto;font-size:9px;color:var(--dim);transition:color .15s;text-align:center;padding-top:4px;
+    font-variant-numeric:tabular-nums;height:16px;overflow:hidden;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="bgfix"></div>
+
+<header>
+  <h1>VitD-Kinetik<small>v1.17</small></h1>
+  <div id="plateauHead">–</div>
+</header>
+
+<div id="tabs">
+  <button id="tabVerlauf" class="on" type="button">Verlauf</button>
+  <button id="tabDosis" type="button">Dosis→Spiegel</button>
+  <button id="tabBilanz" type="button">Bilanz</button>
+  <button id="tabDiary" type="button">Tagebuch</button>
+</div>
+
+<div id="viewChart" style="display:contents">
+<div id="toggles">
+  <button id="tgDamp" type="button">Puffer</button>
+  <button id="tgLoad" type="button">Aufdos.</button>
+  <button id="tgStop" type="button">Stopp</button>
+</div>
+
+<div id="chartWrap">
+  <svg id="chart" viewBox="0 0 360 260" preserveAspectRatio="none" aria-label="Spiegelverlauf" style="touch-action:none"></svg>
+</div>
+
+<div id="readouts">
+  <div class="ro"><div class="lab">Plateau</div><div class="val"><span id="roPlateau">–</span><small> ng/ml</small></div></div>
+  <div class="ro"><div class="lab">nach 90 Tagen</div><div class="val"><span id="ro90">–</span><small> ng/ml</small></div></div>
+  <div class="ro"><div class="lab" id="roTargetLab">bis 30 ng/ml</div><div class="val"><span id="roDays">–</span><small id="roUnit"> Tage</small></div></div>
+</div>
+
+<div id="controls">
+  <div class="ctl">
+    <div class="row"><span class="name">Körpergewicht</span><span class="value" id="vW">90 kg</span></div>
+    <input type="range" id="sW" min="40" max="125" step="1" value="90">
+  </div>
+  <div class="ctl">
+    <div class="row"><span class="name">Tagesdosis Supplement</span><span class="value" id="vD">9.000 IE</span></div>
+    <input type="range" id="sD" min="0" max="20000" step="500" value="9000">
+  </div>
+  <div class="ctl c-load off" id="ctlLD">
+    <div class="row"><span class="name">Aufdosierung: Tagesdosis</span><span class="value" id="vLD">20.000 IE</span></div>
+    <input type="range" id="sLD" min="5000" max="50000" step="1000" value="20000">
+  </div>
+  <div class="ctl c-load off" id="ctlLT">
+    <div class="row"><span class="name">Aufdosierung: Dauer</span><span class="value" id="vLT">10 Tage</span></div>
+    <input type="range" id="sLT" min="1" max="30" step="1" value="10">
+  </div>
+  <div class="ctl c-load off" id="ctlLZ">
+    <div class="row"><span class="name">Aufdosierung: Ziel</span><span class="value" id="vLZ">60 ng/ml</span></div>
+    <input type="range" id="sLZ" min="30" max="100" step="1" value="60">
+  </div>
+  <div class="ctl c-load off" id="ctlST">
+    <div class="row"><span class="name">Einnahmestopp ab Tag</span><span class="value" id="vST">60</span></div>
+    <input type="range" id="sST" min="5" max="115" step="1" value="60">
+  </div>
+  <div class="ctl c-extra">
+    <div class="row"><span class="name">Sonstige Zufuhr (Sonne/Nahrung)</span><span class="value" id="vE">0 IE</span></div>
+    <input type="range" id="sE" min="0" max="4000" step="250" value="0">
+  </div>
+  <div class="ctl c-c0">
+    <div class="row"><span class="name">Startwert (Restbestand)</span><span class="value" id="vC">26 ng/ml</span></div>
+    <input type="range" id="sC" min="0" max="60" step="1" value="26">
+  </div>
+  <div class="ctl c-hwz">
+    <div class="row"><span class="name">Effektive System-HWZ</span><span class="value" id="vH">60 Tage</span></div>
+    <input type="range" id="sH" min="20" max="90" step="1" value="60">
+  </div>
+</div>
+
+<footer id="formel">C(t) = C₀·e^(−kt) + ΔC∞·(1−e^(−kt))</footer>
+</div>
+
+<div id="viewDiary">
+  <div class="dhead" style="padding-bottom:2px"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3 [mg]</span><span></span></div>
+  <div class="din">
+    <div id="diDate"><span id="diDateTxt">–</span><span class="arr">▲<br>▼</span></div>
+    <input type="text" id="diD" inputmode="numeric" placeholder="z. B. 9.000" autocomplete="off">
+    <input type="text" id="diO" inputmode="numeric" placeholder="z. B. 2.000" autocomplete="off">
+    <button id="diAdd" type="button">+</button>
+  </div>
+  <div class="dhead"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3 [mg]</span><span></span></div>
+  <div id="dlist"></div>
+  <div id="dsum"><span id="dsumL">0 Einträge</span><span><span id="dsumR"></span> <button id="dExp" type="button">Export</button></span></div>
+  <div id="dnote">…</div>
+</div>
+
+<div id="ovl">
+  <div id="ovlBox">
+    <h2>Tagebuch als CSV – markieren und kopieren</h2>
+    <textarea id="ovlTxt" readonly></textarea>
+    <button id="ovlClose" type="button">Schließen</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var LN2 = Math.LN2;
+  var TDAYS = 120;
+  var mode = 'verlauf';
+  var scrubT = null;
+  var dampOn = false;     // Puffer unten: k faellt bei niedrigem C
+  var loadOn = false;     // Aufdosierungsphase aktiv
+  var stopOn = false;     // Einnahmestopp aktiv
+  var VK = 1.65;          // Anker: V*k [IE/(kg*ng/ml*Tag)] aus Steady-State-Studien.
+                          // V wird aus der HWZ mitgefuehrt: V = VK/(ln2/HWZ).
+                          // HWZ 60 d -> V=143 (von Helden), HWZ 42 d -> V=100 (van Groningen).
+
+  var C_DAMP = 10;        // ng/ml: hier halbiert sich k  [Vermutung, gesetzter Anker]
+  // V=100 (van Groningen, an Patientendaten gefittet) zusammen mit der
+  // EFFEKTIVEN System-Halbwertszeit des oralen D3 (Fettdepot -> 25(OH)D),
+  // die laenger ist als die reine Tracer-HWZ von 25(OH)D (15-25 d).
+
+  var $ = function(id){ return document.getElementById(id); };
+  var sW=$('sW'), sD=$('sD'), sE=$('sE'), sC=$('sC'), sH=$('sH'), sLD=$('sLD'), sLT=$('sLT'), sLZ=$('sLZ'), sST=$('sST');
+  var svg=$('chart');
+
+  // Modell -------------------------------------------------------------
+  // dC/dt = gross - k(C)*C ,  gross = (Dosis+Sonstige)/(100*kg)
+  function model(w, dose, extra, c0, hwz, damp, V, load){
+    var k0 = LN2/hwz;
+    var gross = (dose+extra)/(V*w);                    // Erhaltungsphase
+    var grossL = load ? (load.dose+extra)/(V*w) : gross;  // Aufdosierphase
+    var tL = load ? load.days : 0;
+    var tS = (load && load.stop) ? load.stop : Infinity;   // Einnahmestopp
+    var grossS = extra/(V*w);                              // nach Stopp nur Sonne/Nahrung
+
+    function kOf(c){
+      var f = k0;
+      if (damp) f *= (c*c)/(c*c + C_DAMP*C_DAMP);
+      return f;
+    }
+    function rate(c){ return gross - kOf(c)*c; }        // Erhaltung (Bilanz-Tab)
+    function rateAt(c,t){ return (t >= tS ? grossS : (t < tL ? grossL : gross)) - kOf(c)*c; }
+
+    // Plateau: Nullstelle von rate(c) per Bisektion
+    function plateau(){
+      if (gross <= 0) return 0;
+      var lo=0, hi=10;
+      while (rate(hi) > 0 && hi < 100000) hi *= 2;
+      for (var i=0;i<80;i++){
+        var mid=(lo+hi)/2;
+        if (rate(mid) > 0) lo=mid; else hi=mid;
+      }
+      return (lo+hi)/2;
+    }
+
+    // Trajektorie per RK4, dt = 0.25 d
+    var dt = 0.25, N = Math.round(TDAYS/dt);
+    var traj = new Float64Array(N+1);
+    traj[0] = c0;
+    for (var n=0;n<N;n++){
+      var c = traj[n], t0 = n*dt;
+      var a1 = rateAt(c, t0);
+      var a2 = rateAt(Math.max(0, c + dt*a1/2), t0+dt/2);
+      var a3 = rateAt(Math.max(0, c + dt*a2/2), t0+dt/2);
+      var a4 = rateAt(Math.max(0, c + dt*a3), t0+dt);
+      traj[n+1] = Math.max(0, c + dt*(a1 + 2*a2 + 2*a3 + a4)/6);
+    }
+    function C(t){
+      var x = Math.max(0, Math.min(TDAYS, t))/dt;
+      var i = Math.floor(x), f = x - i;
+      if (i >= N) return traj[N];
+      return traj[i]*(1-f) + traj[i+1]*f;
+    }
+
+    var peak=0, peakT=0;
+    for (var q=0;q<=N;q++){ if (traj[q]>peak){ peak=traj[q]; peakT=q*dt; } }
+    return { k0:k0, gross:gross, kOf:kOf, rate:rate, C:C, plateau:plateau(),
+             nonlin:damp, peak:peak, peakT:peakT, loadDays:tL, stopDay:(tS===Infinity?0:tS) };
+  }
+
+  // Kreuzungszeit mit Zielwert (numerisch, da nichtlinear moeglich)
+  function crossing(target, c0, m){
+    if (Math.abs(c0-target) < 1e-9) return {mode:'auf', t:0};
+    var up = c0 < target;
+    var prev = c0;
+    for (var t=0.25; t<=TDAYS; t+=0.25){
+      var c = m.C(t);
+      if (up && c >= target) return {mode:'auf', t:t};
+      if (!up && c <= target) return {mode:'ab', t:t};
+      prev = c;
+    }
+    if (!up) return {mode:'immer', t:null};
+    return {mode:'nie', t:null};
+  }
+
+  function fmtInt(x){ return Math.round(x).toLocaleString('de-DE'); }
+  function fmt1(x){ return x.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+  function fmt2(x){ return x.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  var VW=360, VH=260, ML=30, MR=8, MT=8, MB=22;
+  function sx(t){ return ML + (VW-ML-MR)*t/TDAYS; }
+
+  // Ansicht 1: Verlauf C(t), y fix 0..100 ng/ml ------------------------
+  function drawVerlauf(m, mLo, mHi, mRef, c0, showRef){
+    var ymax = 100;
+    function sy(v){ return MT + (VH-MT-MB)*(1 - v/ymax); }
+    function path(mm){
+      var p='';
+      for(var i=0;i<=160;i++){
+        var t=TDAYS*i/160;
+        p += (i===0?'M':'L') + sx(t).toFixed(1) + ',' + sy(mm.C(t)).toFixed(1);
+      }
+      return p;
+    }
+    var s='';
+    s+='<defs><clipPath id="plot"><rect x="'+ML+'" y="'+MT+'" width="'+(VW-ML-MR)+'" height="'+(VH-MT-MB)+'"/></clipPath></defs>';
+    s+='<rect x="'+ML+'" y="'+sy(20)+'" width="'+(VW-ML-MR)+'" height="'+(sy(0)-sy(20))+'" fill="#8b1e1e" opacity="0.20"/>';
+    s+='<rect x="'+ML+'" y="'+sy(100)+'" width="'+(VW-ML-MR)+'" height="'+(sy(30)-sy(100))+'" fill="#1e6e3a" opacity="0.14"/>';
+    s+='<text class="zonelabel" x="'+(VW-MR-3)+'" y="'+(sy(10)+3)+'" text-anchor="end" fill="#f08080">Mangel &lt;20</text>';
+    s+='<text class="zonelabel" x="'+(VW-MR-3)+'" y="'+(sy(95)+3)+'" text-anchor="end" fill="#7ee2a8">Ziel 30&#8211;100</text>';
+
+    if (m.loadDays > 0){
+      var xL = sx(Math.min(m.loadDays,TDAYS));
+      s+='<rect x="'+ML+'" y="'+MT+'" width="'+(xL-ML)+'" height="'+(VH-MT-MB)+'" fill="#f0a500" opacity="0.10"/>';
+      s+='<line x1="'+xL+'" y1="'+MT+'" x2="'+xL+'" y2="'+(VH-MB)+'" stroke="#f0a500" stroke-width="0.9" stroke-dasharray="2 2" opacity="0.85"/>';
+    }
+    if (m.stopDay > 0 && m.stopDay < TDAYS){
+      var xS = sx(m.stopDay);
+      s+='<rect x="'+xS+'" y="'+MT+'" width="'+(VW-MR-xS)+'" height="'+(VH-MT-MB)+'" fill="#f08080" opacity="0.07"/>';
+      s+='<line x1="'+xS+'" y1="'+MT+'" x2="'+xS+'" y2="'+(VH-MB)+'" stroke="#f08080" stroke-width="0.9" stroke-dasharray="2 2" opacity="0.85"/>';
+    }
+    for(var yv=0; yv<=100.001; yv+=20){
+      s+='<line class="gridline" x1="'+ML+'" y1="'+sy(yv)+'" x2="'+(VW-MR)+'" y2="'+sy(yv)+'"/>';
+      s+='<text class="ticktext" x="'+(ML-4)+'" y="'+(sy(yv)+3)+'" text-anchor="end">'+yv+'</text>';
+    }
+    for(var tv=0; tv<=TDAYS; tv+=30){
+      s+='<line class="gridline" x1="'+sx(tv)+'" y1="'+MT+'" x2="'+sx(tv)+'" y2="'+(VH-MB)+'"/>';
+      s+='<text class="ticktext" x="'+sx(tv)+'" y="'+(VH-MB+12)+'" text-anchor="middle">'+tv+' d</text>';
+    }
+    s+='<line class="axis" x1="'+ML+'" y1="'+(VH-MB)+'" x2="'+(VW-MR)+'" y2="'+(VH-MB)+'"/>';
+    s+='<line class="axis" x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(VH-MB)+'"/>';
+
+    var band = path(mHi), back='';
+    for(var j=160;j>=0;j--){
+      var t2=TDAYS*j/160;
+      back += 'L' + sx(t2).toFixed(1) + ',' + sy(mLo.C(t2)).toFixed(1);
+    }
+    s+='<path d="'+band+back+'Z" fill="#f0a500" opacity="0.16" clip-path="url(#plot)"/>';
+
+    // lineare Referenz nur zeigen, wenn ein Term aktiv ist
+    if (showRef){
+      s+='<path d="'+path(mRef)+'" fill="none" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="4 3" clip-path="url(#plot)"/>';
+    }
+
+    if (m.plateau <= ymax){
+      s+='<line x1="'+ML+'" y1="'+sy(m.plateau)+'" x2="'+(VW-MR)+'" y2="'+sy(m.plateau)+'" stroke="#f0a500" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.7"/>';
+    } else if (scrubT === null){
+      s+='<text x="'+(ML+6)+'" y="'+(MT+12)+'" fill="#f0a500" font-size="10" font-weight="600">Plateau '+fmt1(m.plateau)+' ng/ml &#8211; au&#223;erhalb der Skala</text>';
+    }
+    s+='<path d="'+path(m)+'" fill="none" stroke="#f0a500" stroke-width="2.6" stroke-linecap="round" clip-path="url(#plot)"/>';
+
+    if (scrubT !== null){
+      var tS = scrubT, cS = m.C(tS), rS = m.rate(cS);
+      s+='<line x1="'+sx(tS)+'" y1="'+MT+'" x2="'+sx(tS)+'" y2="'+(VH-MB)+'" stroke="#e6edf3" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.7"/>';
+      s+='<circle cx="'+sx(tS)+'" cy="'+sy(cS)+'" r="4.2" fill="#e6edf3" stroke="#0d1117" stroke-width="1.4"/>';
+      var anchor = tS < TDAYS*0.55 ? 'start' : 'end';
+      var xTxt = tS < TDAYS*0.55 ? sx(tS)+7 : sx(tS)-7;
+      s+='<text x="'+xTxt+'" y="'+(MT+12)+'" text-anchor="'+anchor+'" fill="#e6edf3" font-size="11" font-weight="600">Tag '+Math.round(tS)+' &#183; '+fmt1(cS)+' ng/ml</text>';
+      s+='<text x="'+xTxt+'" y="'+(MT+25)+'" text-anchor="'+anchor+'" fill="#8b949e" font-size="10">'+(rS>=0?'+':'&#8722;')+fmt2(Math.abs(rS))+' ng/ml pro Tag</text>';
+      if (showRef){
+        var dLin = cS - mRef.C(tS);
+        s+='<text x="'+xTxt+'" y="'+(MT+38)+'" text-anchor="'+anchor+'" fill="#8b949e" font-size="10">vs. Vergleich '+(dLin>=0?'+':'&#8722;')+fmt1(Math.abs(dLin))+'</text>';
+      }
+    }
+    svg.innerHTML = s;
+  }
+
+  // Ansicht 2: Tagesbilanz, x fix 0..100 ng/ml -------------------------
+  function drawBilanz(m, mRef, c0, showRef){
+    var xmaxC = 100;
+    // y-Bereich um den Nulldurchgang herum fokussieren: die extreme
+    // Abbaurate am rechten Rand darf die Skala nicht sprengen (v1.4-Fix)
+    var yTop = Math.max(m.gross, 0.3)*1.15;
+    var yBot = Math.max(Math.min(m.rate(xmaxC)*1.1, -yTop*0.6), -yTop*2.2);
+    function bx(c){ return ML + (VW-ML-MR)*c/xmaxC; }
+    function by(r){ return MT + (VH-MT-MB)*(yTop - r)/(yTop - yBot); }
+    function clampY(r){ return Math.max(yBot, Math.min(yTop, r)); }
+    // fuer den Kurvenzug weiter clampen, damit sie sichtbar aus dem Plot laeuft
+    function clipY(r){ var pad=(yTop-yBot); return Math.max(yBot-pad, Math.min(yTop+pad, r)); }
+
+    var s='';
+    s+='<defs><clipPath id="plot2"><rect x="'+ML+'" y="'+MT+'" width="'+(VW-ML-MR)+'" height="'+(VH-MT-MB)+'"/></clipPath></defs>';
+    s+='<rect x="'+bx(0)+'" y="'+MT+'" width="'+(bx(20)-bx(0))+'" height="'+(VH-MT-MB)+'" fill="#8b1e1e" opacity="0.18"/>';
+    s+='<rect x="'+bx(30)+'" y="'+MT+'" width="'+(bx(100)-bx(30))+'" height="'+(VH-MT-MB)+'" fill="#1e6e3a" opacity="0.12"/>';
+    s+='<text class="zonelabel" x="'+bx(10)+'" y="'+(VH-MB-5)+'" text-anchor="middle" fill="#f08080">Mangel</text>';
+    s+='<text class="zonelabel" x="'+bx(85)+'" y="'+(VH-MB-5)+'" text-anchor="middle" fill="#7ee2a8">Ziel 30&#8211;100</text>';
+
+    for(var cv=0; cv<=xmaxC; cv+=20){
+      s+='<line class="gridline" x1="'+bx(cv)+'" y1="'+MT+'" x2="'+bx(cv)+'" y2="'+(VH-MB)+'"/>';
+      s+='<text class="ticktext" x="'+bx(cv)+'" y="'+(VH-MB+12)+'" text-anchor="middle">'+cv+'</text>';
+    }
+    // Schrittweite aus dem Bereich ableiten -> immer ca. 6-8 Linien
+    var span = yTop - yBot, raw = span/7;
+    var mag = Math.pow(10, Math.floor(Math.log(raw)/Math.LN10));
+    var rstep = (raw/mag < 1.5 ? 1 : raw/mag < 3.5 ? 2 : raw/mag < 7.5 ? 5 : 10) * mag;
+    for(var rv=Math.ceil(yBot/rstep)*rstep; rv<=yTop+0.001; rv+=rstep){
+      s+='<line class="gridline" x1="'+ML+'" y1="'+by(rv)+'" x2="'+(VW-MR)+'" y2="'+by(rv)+'"/>';
+      s+='<text class="ticktext" x="'+(ML-4)+'" y="'+(by(rv)+3)+'" text-anchor="end">'+(Math.abs(rv)<1e-9?0:rv).toLocaleString('de-DE',{maximumFractionDigits:(rstep<0.5?2:rstep<1?1:0)})+'</text>';
+    }
+    s+='<line x1="'+ML+'" y1="'+by(0)+'" x2="'+(VW-MR)+'" y2="'+by(0)+'" stroke="#e6edf3" stroke-width="1" opacity="0.55"/>';
+    s+='<line class="axis" x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(VH-MB)+'"/>';
+    s+='<line class="axis" x1="'+ML+'" y1="'+(VH-MB)+'" x2="'+(VW-MR)+'" y2="'+(VH-MB)+'"/>';
+
+    // lineare Referenzgerade
+    if (showRef){
+      var pr='';
+      for(var q=0;q<=120;q++){ var ccr=xmaxC*q/120;
+        pr += (q===0?'M':'L') + bx(ccr).toFixed(1) + ',' + by(clipY(mRef.rate(ccr))).toFixed(1); }
+      s+='<path d="'+pr+'" fill="none" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="4 3" clip-path="url(#plot2)"/>';
+    }
+    // Bilanzkurve (bei aktiven Termen gekruemmt)
+    var p='';
+    for(var i=0;i<=120;i++){
+      var cc = xmaxC*i/120;
+      p += (i===0?'M':'L') + bx(cc).toFixed(1) + ',' + by(clipY(m.rate(cc))).toFixed(1);
+    }
+    s+='<path d="'+p+'" fill="none" stroke="#f0a500" stroke-width="2.6" stroke-linecap="round" clip-path="url(#plot2)"/>';
+
+    if (m.plateau <= xmaxC){
+      s+='<circle cx="'+bx(m.plateau)+'" cy="'+by(0)+'" r="4" fill="#0d1117" stroke="#f0a500" stroke-width="2"/>';
+      s+='<text x="'+bx(m.plateau)+'" y="'+(by(0)+16)+'" text-anchor="middle" fill="#f0a500" font-size="10" font-weight="600">Plateau '+fmt1(m.plateau)+'</text>';
+    }
+    var r0 = m.rate(c0);
+    s+='<circle cx="'+bx(c0)+'" cy="'+by(clampY(r0))+'" r="4.6" fill="#58a6ff" stroke="#0d1117" stroke-width="1.4"/>';
+    var anch = c0 < xmaxC*0.6 ? 'start' : 'end';
+    var xT = c0 < xmaxC*0.6 ? bx(c0)+8 : bx(c0)-8;
+    var yLab = Math.max(MT+12, by(clampY(r0))-8);
+    s+='<text x="'+xT+'" y="'+yLab+'" text-anchor="'+anch+'" fill="#58a6ff" font-size="11" font-weight="600">Start: '+(r0>=0?'+':'&#8722;')+fmt2(Math.abs(r0))+' ng/ml/Tag</text>';
+    s+='<text class="ticktext" x="'+(VW-MR)+'" y="'+(VH-2)+'" text-anchor="end">aktueller Spiegel [ng/ml]</text>';
+    svg.innerHTML = s;
+  }
+
+  // Ansicht 3: Dosis -> Spiegel (x = Tagesdosis IE, y = Plateau ng/ml) --
+  function drawDosis(w, extra, c0, hwz, damp, V, curDose){
+    var xmaxD = 20000, ymax = 100;
+    function dx(D){ return ML + (VW-ML-MR)*D/xmaxD; }
+    function dy(v){ return MT + (VH-MT-MB)*(1 - v/ymax); }
+    function plateauOf(D){ return model(w, D, extra, c0, hwz, damp, V, null).plateau; }
+
+    var s='';
+    s+='<defs><clipPath id="plot3"><rect x="'+ML+'" y="'+MT+'" width="'+(VW-ML-MR)+'" height="'+(VH-MT-MB)+'"/></clipPath></defs>';
+    // Zonen horizontal wie im Verlauf
+    s+='<rect x="'+ML+'" y="'+dy(20)+'" width="'+(VW-ML-MR)+'" height="'+(dy(0)-dy(20))+'" fill="#8b1e1e" opacity="0.20"/>';
+    s+='<rect x="'+ML+'" y="'+dy(100)+'" width="'+(VW-ML-MR)+'" height="'+(dy(30)-dy(100))+'" fill="#1e6e3a" opacity="0.14"/>';
+    s+='<text class="zonelabel" x="'+(VW-MR-3)+'" y="'+(dy(10)+3)+'" text-anchor="end" fill="#f08080">Mangel &lt;20</text>';
+    s+='<text class="zonelabel" x="'+(VW-MR-3)+'" y="'+(dy(95)+3)+'" text-anchor="end" fill="#7ee2a8">Ziel 30&#8211;100</text>';
+
+    for(var yv=0; yv<=100.001; yv+=20){
+      s+='<line class="gridline" x1="'+ML+'" y1="'+dy(yv)+'" x2="'+(VW-MR)+'" y2="'+dy(yv)+'"/>';
+      s+='<text class="ticktext" x="'+(ML-4)+'" y="'+(dy(yv)+3)+'" text-anchor="end">'+yv+'</text>';
+    }
+    for(var dv=0; dv<=xmaxD; dv+=5000){
+      s+='<line class="gridline" x1="'+dx(dv)+'" y1="'+MT+'" x2="'+dx(dv)+'" y2="'+(VH-MB)+'"/>';
+      var ta = (dv===xmaxD) ? 'end' : 'middle';
+      s+='<text class="ticktext" x="'+dx(dv)+'" y="'+(VH-MB+12)+'" text-anchor="'+ta+'">'+fmtInt(dv)+'</text>';
+    }
+    s+='<line class="axis" x1="'+ML+'" y1="'+(VH-MB)+'" x2="'+(VW-MR)+'" y2="'+(VH-MB)+'"/>';
+    s+='<line class="axis" x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(VH-MB)+'"/>';
+
+    // Plateau-Kurve ueber der Dosis
+    var p='';
+    for(var i=0;i<=60;i++){
+      var D = xmaxD*i/60;
+      p += (i===0?'M':'L') + dx(D).toFixed(1) + ',' + dy(Math.min(ymax*1.3, plateauOf(D))).toFixed(1);
+    }
+    s+='<path d="'+p+'" fill="none" stroke="#f0a500" stroke-width="2.6" stroke-linecap="round" clip-path="url(#plot3)"/>';
+
+    // Marker: aktuelle Tagesdosis vom Regler
+    var pc = plateauOf(curDose);
+    s+='<line x1="'+dx(curDose)+'" y1="'+MT+'" x2="'+dx(curDose)+'" y2="'+(VH-MB)+'" stroke="#e6edf3" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.6"/>';
+    if (pc <= ymax){
+      s+='<circle cx="'+dx(curDose)+'" cy="'+dy(pc)+'" r="4.6" fill="#58a6ff" stroke="#0d1117" stroke-width="1.4"/>';
+    }
+    var anch = curDose < xmaxD*0.55 ? 'start' : 'end';
+    var xT = curDose < xmaxD*0.55 ? dx(curDose)+7 : dx(curDose)-7;
+    s+='<text x="'+xT+'" y="'+(MT+26)+'" text-anchor="'+anch+'" fill="#e6edf3" font-size="11" font-weight="600">'+fmtInt(curDose)+' IE \u2192 '+fmt1(pc)+' ng/ml</text>';
+    s+='<text class="ticktext" x="'+(ML+4)+'" y="'+(MT+12)+'" text-anchor="start">Tagesdosis [IE] auf x</text>';
+    svg.innerHTML = s;
+  }
+
+  // Tagebuch ------------------------------------------------------------
+  var diary = [];   // {date:'YYYY-MM-DD', d:IE, o:mg}
+  // Persistenz: localStorage wenn verfuegbar (GitHub Pages / Safari / PWA);
+  // die Claude-Vorschau blockt localStorage -> Fallback nur-Sitzung.
+  var STORE='vitd-tagebuch-v1';
+  var storageOk=false;
+  try {
+    window.localStorage.setItem(STORE+'-t','1');
+    window.localStorage.removeItem(STORE+'-t');
+    storageOk=true;
+  } catch(e){ storageOk=false; }
+  function diaryLoad(){
+    if(!storageOk) return;
+    try {
+      var raw=window.localStorage.getItem(STORE);
+      if(raw){ var arr=JSON.parse(raw);
+        if(Object.prototype.toString.call(arr)==='[object Array]'){
+          diary=arr.filter(function(e){return e&&typeof e.date==='string';})
+                   .map(function(e){return {date:e.date, d:Math.max(0,+e.d||0), o:Math.max(0,+e.o||0)};});
+        } }
+    } catch(e){}
+  }
+  function diarySave(){
+    if(!storageOk) return;
+    try { window.localStorage.setItem(STORE, JSON.stringify(diary)); } catch(e){}
+  }
+  function diaryCSV(){
+    var out='Datum;VitaminD_IE;Omega3_mg';
+    var cp=diary.slice().sort(function(a,b){ return a.date<b.date?-1:1; });
+    for (var i=0;i<cp.length;i++){ out+='\n'+cp[i].date+';'+cp[i].d+';'+cp[i].o; }
+    return out;
+  }
+  function fmtDate(iso){
+    var pt = iso.split('-');
+    return pt[2]+'.'+pt[1]+'.'+pt[0].slice(2);
+  }
+  function renderDiary(){
+    diary.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+    var out='';
+    for (var i=0;i<diary.length;i++){
+      var e=diary[i];
+      out+='<div class="drow"><span>'+fmtDate(e.date)+'</span><span>'+(e.d?fmtInt(e.d)+' IE':'\u2013')+
+           '</span><span>'+(e.o?fmtInt(e.o)+' mg':'\u2013')+'</span><button type="button" data-i="'+i+'">\u2715</button></div>';
+    }
+    $('dlist').innerHTML = out;
+    var sd=0, so=0;
+    for (var j=0;j<diary.length;j++){ sd+=diary[j].d; so+=diary[j].o; }
+    $('dsumL').textContent = diary.length+' Eintr\u00e4ge';
+    $('dnote').textContent = storageOk
+      ? 'gespeichert auf diesem Ger\u00e4t (localStorage)'
+      : 'Vorschau: nur diese Sitzung \u2013 auf GitHub Pages wird dauerhaft gespeichert';
+    $('dsumR').textContent = '\u03a3 '+fmtInt(sd)+' IE \u00b7 '+fmtInt(so)+' mg';
+  }
+  function todayISO(){
+    var n=new Date();
+    return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  }
+
+  // Kur-Planer: Dosis <-> Dauer gekoppelt, so dass C(T) = Ziel ------------
+  // D(T) = 1,65*w*(Z - C0*e^-kT)/(1-e^-kT) ;  T(D) = -ln((Cinf-Z)/(Cinf-C0))/k
+  var loadWarn = '';
+  function syncLoad(master){
+    loadWarn = '';
+    if (!loadOn) return;
+    var w=+sW.value, hwz=+sH.value, C0=+sC.value, Z=+sLZ.value;
+    var k=LN2/hwz, Vw=VK*w;
+    if (C0 >= Z){ loadWarn='Start \u2265 Ziel \u2013 keine Aufdosierung n\u00f6tig'; return; }
+
+    function doseFor(T){ var e=Math.exp(-k*T); return Vw*(Z - C0*e)/(1-e); }
+    function daysFor(D){
+      var Ci = D/Vw;                       // Plateau der Kurdosis
+      if (Ci <= Z*1.0001) return Infinity; // Kurdosis traegt das Ziel nicht
+      return -Math.log((Ci-Z)/(Ci-C0))/k;
+    }
+    var T, D;
+    if (master==='dose'){
+      D=+sLD.value; T=daysFor(D);
+      if (T > 30){ T=30; D=Math.ceil(doseFor(30)/1000)*1000; }
+      else if (T < 1){ T=1; D=Math.ceil(doseFor(1)/1000)*1000; }
+      else T=Math.round(T);
+    } else {
+      T=+sLT.value; D=Math.ceil(doseFor(T)/1000)*1000;
+    }
+    if (D > 50000){ D=50000; T=daysFor(D); T=Math.min(30, Math.max(1, Math.ceil(T))); }
+    if (D < 5000) D=5000;
+    // Machbarkeitspruefung am Ende
+    var Tchk=daysFor(D);
+    if (Tchk===Infinity || Tchk > 30.5){
+      loadWarn='Ziel '+Z+' in \u226430 d nicht erreichbar (max 50.000 IE/d)';
+      D=50000; T=30;
+    }
+    sLD.value=String(D); sLT.value=String(T);
+  }
+
+  // Haupt-Render --------------------------------------------------------
+  function render(){
+    var w=+sW.value, dose=+sD.value, extra=+sE.value, c0=+sC.value, hwz=+sH.value;
+    var lDose=+sLD.value, lDays=+sLT.value, tStop=+sST.value;
+    var noLoad = loadOn && (+sC.value >= +sLZ.value);   // Start >= Ziel: nichts aufzudosieren
+    var load = (loadOn || stopOn) ? {dose:(loadOn&&!noLoad?lDose:dose), days:(loadOn&&!noLoad?lDays:0),
+                                     stop:(stopOn?tStop:0)} : null;
+    var V = VK / (LN2/hwz);
+    var m   = model(w,dose,extra,c0,hwz,dampOn,V,load);
+    // Vergleichskurve: gleiche Dosis, aber reine Tracer-HWZ von 25(OH)D
+    // Referenzkurve ohne Puffer-Term (fuer den Puffer-Vergleich)
+    var mRef= model(w,dose,extra,c0,hwz,false,V,load);
+    var mLo = model(w,dose,extra,c0,Math.round(hwz*2/3),dampOn,V,load);
+    var mHi = model(w,dose,extra,c0,Math.round(hwz*4/3),dampOn,V,load);
+    var showRef = dampOn;
+
+    if (mode==='diary'){ /* Chart-View versteckt */ }
+    else if (mode==='verlauf') drawVerlauf(m,mLo,mHi,mRef,c0,showRef);
+    else if (mode==='dosis') drawDosis(w, extra, c0, hwz, dampOn, V, dose);
+    else drawBilanz(m,mRef,c0,showRef);
+
+    $('vW').textContent = w+' kg';
+    $('vD').textContent = fmtInt(dose)+' IE';
+    $('vE').textContent = fmtInt(extra)+' IE';
+    $('vC').textContent = c0+' ng/ml';
+    $('vH').textContent = hwz+' Tage';
+    $('vLD').textContent = fmtInt(lDose)+' IE';
+    $('vLT').textContent = lDays+' Tage';
+    $('vLZ').textContent = sLZ.value+' ng/ml';
+    $('ctlLZ').className = 'ctl c-load' + (loadOn?'':' off');
+    $('vST').textContent = String(tStop);
+    $('ctlLD').className = 'ctl c-load' + (loadOn?'':' off');
+    $('ctlLT').className = 'ctl c-load' + (loadOn?'':' off');
+    $('ctlST').className = 'ctl c-load' + (stopOn?'':' off');
+    $('tgLoad').className = loadOn ? 'on' : '';
+    $('tgStop').className = stopOn ? 'on' : '';
+
+    $('plateauHead').textContent = 'Plateau '+fmt1(m.plateau)+' ng/ml';
+    $('roPlateau').textContent = fmt1(m.plateau);
+    $('ro90').textContent = fmt1(m.C(90));
+
+    if (stopOn){
+      $('roUnit').textContent = ' Tage';
+      var below=null;
+      for (var tq=tStop; tq<=TDAYS; tq+=0.25){ if (m.C(tq) < 30){ below=tq; break; } }
+      if (m.C(tStop) < 30){
+        $('roTargetLab').textContent = 'bei Stopp (Tag '+tStop+')';
+        $('roDays').textContent = fmt1(m.C(tStop));
+        $('roUnit').textContent = ' ng/ml';
+      } else if (below!==null){
+        $('roTargetLab').textContent = 'unter 30 ab Tag';
+        $('roDays').textContent = fmtInt(below);
+        $('roUnit').textContent = '';
+      } else {
+        $('roTargetLab').textContent = '\u00fcber 30 bis Tag 120';
+        $('roDays').textContent = fmt1(m.C(TDAYS));
+        $('roUnit').textContent = ' ng/ml';
+      }
+    } else if (loadOn){
+      $('roUnit').textContent = ' ng/ml';
+      if (m.peakT < 119){
+        $('roTargetLab').textContent = 'Maximum (Tag '+Math.round(m.peakT)+')';
+        $('roDays').textContent = fmt1(m.peak);
+      } else {
+        $('roTargetLab').textContent = 'Ende Aufdos. (Tag '+lDays+')';
+        $('roDays').textContent = fmt1(m.C(lDays));
+      }
+    } else {
+    $('roUnit').textContent = ' Tage';
+    var cr = crossing(30, c0, m);
+    if (cr.mode==='auf'){
+      $('roTargetLab').textContent = 'bis 30 ng/ml';
+      $('roDays').textContent = (cr.t<1 ? fmt1(cr.t) : fmtInt(cr.t));
+    } else if (cr.mode==='ab'){
+      $('roTargetLab').textContent = '\u00fcber 30 noch';
+      $('roDays').textContent = fmtInt(cr.t);
+    } else if (cr.mode==='immer'){
+      $('roTargetLab').textContent = '\u00fcber 30 ng/ml';
+      $('roDays').textContent = 'immer';
+    } else {
+      $('roTargetLab').textContent = 'bis 30 ng/ml';
+      $('roDays').textContent = 'nie';
+    }
+    }
+
+    $('tgDamp').className = dampOn ? 'on' : '';
+
+    var warn = m.peak > 100;
+    $('formel').className = warn ? 'warn' : '';
+    if (warn){
+      $('formel').textContent = '\u26a0 Spitzenwert '+fmt1(m.peak)+' ng/ml \u00fcber 100 \u2013 Bereich mit Hyperkalz\u00e4mie-Berichten';
+    } else if (loadOn && loadWarn){
+      $('formel').className = 'warn';
+      $('formel').textContent = '\u26a0 '+loadWarn;
+    } else if (loadOn){
+      var halt = Math.round(VK*w*(+sLZ.value)/100)*100;
+      $('formel').textContent = 'Kur: '+fmtInt(lDose)+' IE \u00d7 '+lDays+' d \u2192 Ziel '+sLZ.value+
+        ' \u00b7 Erhaltung danach '+fmtInt(halt)+' IE/d';
+    } else if (stopOn){
+      $('formel').textContent = 'Stopp Tag '+tStop+' \u00b7 danach Abbau, HWZ '+hwz+' d'+
+        (extra>0 ? ', Rest-Plateau '+fmt1((extra/(V*w))/(LN2/hwz)) : ', Richtung 0')+' \u00b7 C(120) = '+fmt1(m.C(TDAYS));
+    } else if (dampOn){
+      $('formel').textContent = 'Puffer unter '+C_DAMP+' \u00b7 Plateau '+fmt1(m.plateau)+' statt '+fmt1(mRef.plateau)+' ng/ml (ohne)';
+    } else {
+      $('formel').textContent = '\u0394C\u221e = '+fmtInt(dose+extra)+'/(1,65\u00b7'+w+') = '+fmt1(m.plateau)+' ng/ml \u00b7 V = '+Math.round(V)+' bei HWZ '+hwz+' d';
+    }
+  }
+
+  // Tabs + Toggles ------------------------------------------------------
+  function setMode(mo){
+    mode = mo; scrubT = null;
+    $('tabVerlauf').className = (mo==='verlauf')?'on':'';
+    $('tabDosis').className   = (mo==='dosis')?'on':'';
+    $('tabBilanz').className  = (mo==='bilanz')?'on':'';
+    $('tabDiary').className   = (mo==='diary')?'on':'';
+    $('viewChart').style.display = (mo==='diary') ? 'none' : 'contents';
+    $('viewDiary').style.display = (mo==='diary') ? 'flex' : 'none';
+    if (mo==='diary'){ renderDiary(); } else { render(); }
+  }
+  $('tabVerlauf').addEventListener('click', function(){ setMode('verlauf'); });
+  $('tabDosis').addEventListener('click', function(){ setMode('dosis'); });
+  $('tabBilanz').addEventListener('click', function(){ setMode('bilanz'); });
+  $('tabDiary').addEventListener('click', function(){ setMode('diary'); });
+
+  // Tagebuch-Interaktion
+  function groupDigits(el){
+    var raw = String(el.value).replace(/[^0-9]/g,'').slice(0,7);
+    el.value = raw ? (+raw).toLocaleString('de-DE') : '';
+  }
+  function parseNum(el){
+    return Math.max(0, +String(el.value).replace(/[^0-9]/g,'') || 0);
+  }
+  $('diD').addEventListener('input', function(){ groupDigits($('diD')); });
+  $('diO').addEventListener('input', function(){ groupDigits($('diO')); });
+
+  // Datumsrad: vertikal ziehen = Tag wechseln (hoch = spaeter, runter = frueher)
+  var diDateISO = todayISO();
+  function isoAddDays(iso, n){
+    var pt = iso.split('-');
+    var d = new Date(+pt[0], +pt[1]-1, +pt[2]);
+    d.setDate(d.getDate()+n);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function showDate(){ $('diDateTxt').textContent = fmtDate(diDateISO).replace(/\.(\d\d)$/,'.20$1'); }
+  showDate();
+
+  var dateDrag=false, dateY0=0, dateISO0='';
+  var PXPERDAY=22;
+  var lastTap=0, dateMoved=false;
+  $('diDate').addEventListener('touchstart', function(){ dateDrag=true; }, {passive:true});
+  $('diDate').addEventListener('pointerdown', function(ev){
+    dateDrag=true; dateY0=ev.clientY; dateISO0=diDateISO; dateMoved=false;
+    var now = Date.now();
+    if (now - lastTap < 350){        // Doppeltipp -> heute
+      diDateISO = todayISO(); showDate();
+      dateISO0 = diDateISO;          // Drag setzt danach von heute aus fort
+      lastTap = 0;
+    } else {
+      lastTap = now;
+    }
+    ev.preventDefault();
+  });
+  document.addEventListener('pointermove', function(ev){
+    if(!dateDrag || dateISO0==='') return;
+    if (Math.abs(ev.clientY - dateY0) > 8){ dateMoved=true; lastTap=0; }
+    var steps = Math.round((dateY0 - ev.clientY)/PXPERDAY);
+    var next = isoAddDays(dateISO0, steps);
+    if (next !== diDateISO){ diDateISO = next; showDate(); }
+  });
+  document.addEventListener('pointerup', function(){ dateDrag=false; dateISO0=''; });
+  document.addEventListener('pointercancel', function(){ dateDrag=false; dateISO0=''; });
+  document.addEventListener('touchend', function(){ dateDrag=false; }, {passive:true});
+  document.addEventListener('touchmove', function(ev){
+    if (dateDrag) ev.preventDefault();
+  }, {passive:false});
+
+  diaryLoad();
+  $('dExp').addEventListener('click', function(){
+    $('ovlTxt').value = diaryCSV();
+    $('ovl').className = 'show';
+  });
+  $('ovlClose').addEventListener('click', function(){ $('ovl').className = ''; });
+  $('diAdd').addEventListener('click', function(){
+    var dt = diDateISO || todayISO();
+    var dv = parseNum($('diD'));
+    var ov = parseNum($('diO'));
+    if (dv===0 && ov===0) return;
+    // gleicher Tag: Eintrag ergaenzen statt Duplikat
+    var hit=null;
+    for (var i=0;i<diary.length;i++){ if (diary[i].date===dt){ hit=diary[i]; break; } }
+    if (hit){ hit.d+=dv; hit.o+=ov; } else { diary.push({date:dt, d:dv, o:ov}); }
+    $('diD').value=''; $('diO').value='';
+    diarySave();
+    renderDiary();
+  });
+  $('dlist').addEventListener('click', function(ev){
+    var t = ev.target;
+    if (t && t.getAttribute && t.getAttribute('data-i')!==null){
+      diary.splice(+t.getAttribute('data-i'), 1);
+      diarySave();
+      renderDiary();
+    }
+  });
+  $('tgStop').addEventListener('click', function(){ stopOn = !stopOn; render(); });
+  $('tgLoad').addEventListener('click', function(){ loadOn = !loadOn; syncLoad('days'); render(); });
+  $('tgDamp').addEventListener('click', function(){ dampOn = !dampOn; render(); });
+
+  // Slider
+  [sD,sE,sST].forEach(function(el){ el.addEventListener('input', render); });
+  sLD.addEventListener('input', function(){ syncLoad('dose'); render(); });
+  sLT.addEventListener('input', function(){ syncLoad('days'); render(); });
+  sLZ.addEventListener('input', function(){ syncLoad('days'); render(); });
+  [sW,sC,sH].forEach(function(el){ el.addEventListener('input', function(){ syncLoad('days'); render(); }); });
+
+  // Scrub
+  var scrubbing = false;
+  function evtToDay(ev){
+    var r = svg.getBoundingClientRect();
+    var xv = (ev.clientX - r.left)/r.width*VW;
+    return Math.max(0, Math.min(TDAYS, (xv - ML)/(VW-ML-MR)*TDAYS));
+  }
+  svg.addEventListener('pointerdown', function(ev){
+    if (mode!=='verlauf') return;
+    scrubbing = true; scrubT = evtToDay(ev); render(); ev.preventDefault();
+  });
+  document.addEventListener('pointermove', function(ev){
+    if (!scrubbing) return;
+    scrubT = evtToDay(ev); render();
+  });
+  document.addEventListener('pointerup', function(){
+    if (!scrubbing) return;
+    scrubbing = false; scrubT = null; render();
+  });
+  document.addEventListener('pointercancel', function(){
+    scrubbing = false; scrubT = null; render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
