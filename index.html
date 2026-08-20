@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.33</title>
+<title>VitD-Kinetik v1.34</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -154,7 +154,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.33</small></h1>
+  <h1>VitD-Kinetik<small>v1.34</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -588,7 +588,14 @@
     }
     var sd=0, so=0;
     for (var j=0;j<diary.length;j++){ sd+=diary[j].d; so+=diary[j].o; }
-    $('dsumL').textContent = diary.length+' Eintr\u00e4ge';
+    var halt = '';
+    if (lv && lv.today !== null && lv.today !== undefined){
+      var wq=+sW.value, Vq=+sV.value, hq=+sH.value;
+      var kq = vhOn ? fVH(lv.today)/Vq : LN2/hq;
+      var ieTag = kq*lv.today*Vq*wq;
+      halt = ' \u00b7 halten \u2248 '+fmtInt(Math.round(ieTag/100)*100)+' IE/d';
+    }
+    $('dsumL').textContent = diary.length+' Eintr\u00e4ge'+halt;
     $('dnote').textContent = storageOk
       ? 'gespeichert auf diesem Ger\u00e4t (localStorage)'
       : 'Vorschau: nur diese Sitzung \u2013 auf GitHub Pages wird dauerhaft gespeichert';
