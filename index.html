@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.32</title>
+<title>VitD-Kinetik v1.33</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -154,7 +154,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.32</small></h1>
+  <h1>VitD-Kinetik<small>v1.33</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -973,6 +973,17 @@
 
   render();
 })();
+
+// Service Worker registrieren: sorgt dafuer, dass die Home-Bildschirm-App
+// beim Start immer die neueste Fassung vom Server holt (network-first).
+// updateViaCache:'none' verhindert, dass der Worker selbst veraltet.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+      .then(function (reg) { reg.update(); })
+      .catch(function () { /* Vorschau/kein HTTPS: still ignorieren */ });
+  });
+}
 </script>
 </body>
 </html>
