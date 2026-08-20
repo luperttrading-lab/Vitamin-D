@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.35</title>
+<title>VitD-Kinetik v1.36</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -63,9 +63,14 @@
   #dstart button{background:#1c2128;border:1px solid var(--line);border-radius:8px;color:var(--dim);
     font-size:11px;font-family:inherit;padding:0 4px}
   #dstart button.set{border-color:#7ee2a8;color:#7ee2a8}
-  #dToday{color:var(--amber);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
   .dhead span:last-child{width:42px}
   #dlist{flex:0 0 auto}
+  #dinfo{flex:0 0 auto;position:sticky;top:0;z-index:6;background:var(--bg);
+    border-bottom:1px solid var(--line);height:24px;line-height:24px;margin-bottom:6px;
+    display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;
+    font-variant-numeric:tabular-nums;padding:0 2px}
+  #dToday{color:var(--amber)}
+  #dHalt{color:#7ee2a8}
   #dchartWrap{flex:0 0 auto;height:150px;position:relative;margin-bottom:8px;display:none}
   #dchartWrap.on{display:block}
   #dchart{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -154,7 +159,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.35</small></h1>
+  <h1>VitD-Kinetik<small>v1.36</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -231,7 +236,7 @@
 
 <div id="viewDiary">
   <div class="dhead" style="grid-template-columns:1fr 1.25fr 1.15fr;padding-bottom:2px">
-    <span>Messwert [ng/ml]</span><span>Startdatum</span><span id="dToday">heute ≈ –</span>
+    <span>Messwert [ng/ml]</span><span>Startdatum</span><span>heute berechnet</span>
   </div>
   <div id="dstart">
     <input type="text" id="diC0" inputmode="decimal" placeholder="z. B. 26,5" autocomplete="off">
@@ -245,6 +250,7 @@
     <input type="text" id="diO" inputmode="numeric" placeholder="z. B. 2.000" autocomplete="off">
     <button id="diAdd" type="button">+</button>
   </div>
+  <div id="dinfo"><span id="dToday">heute ≈ –</span><span id="dHalt"></span></div>
   <div id="dchartWrap"><svg id="dchart" viewBox="0 0 360 150" preserveAspectRatio="none"></svg></div>
   <div class="dhead"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3</span><span>≈ ng/ml</span><span></span></div>
   <div id="dlist"></div>
@@ -590,18 +596,19 @@
     }
     var sd=0, so=0;
     for (var j=0;j<diary.length;j++){ sd+=diary[j].d; so+=diary[j].o; }
-    var halt = '';
     if (lv && lv.today !== null && lv.today !== undefined){
       var wq=+sW.value, Vq=+sV.value, hq=+sH.value;
       var kq = vhOn ? fVH(lv.today)/Vq : LN2/hq;
       var ieTag = kq*lv.today*Vq*wq;
-      halt = ' \u00b7 halten \u2248 '+fmtInt(Math.round(ieTag/100)*100)+' IE/d';
+      $('dHalt').textContent = 'halten \u2248 '+fmtInt(Math.round(ieTag/100)*100)+' IE/d';
+    } else {
+      $('dHalt').textContent = '';
     }
-    $('dsumL').textContent = diary.length+' Eintr\u00e4ge'+halt;
+    $('dsumL').textContent = diary.length+' Eintr\u00e4ge';
     $('dnote').textContent = storageOk
       ? 'gespeichert auf diesem Ger\u00e4t (localStorage)'
       : 'Vorschau: nur diese Sitzung \u2013 auf GitHub Pages wird dauerhaft gespeichert';
-    $('dsumR').textContent = '\u03a3 '+fmtInt(sd)+' IE \u00b7 '+fmtInt(so)+' mg';
+    $('dsumR').textContent = '\u03a3 '+fmtInt(sd)+' IE \u00b7 \u03a93 '+fmtInt(so)+' mg';
   }
   function todayISO(){
     var n=new Date();
