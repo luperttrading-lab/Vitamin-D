@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.36</title>
+<title>VitD-Kinetik v1.37</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -159,7 +159,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.36</small></h1>
+  <h1>VitD-Kinetik<small>v1.37</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -596,6 +596,35 @@
     }
     var sd=0, so=0;
     for (var j=0;j<diary.length;j++){ sd+=diary[j].d; so+=diary[j].o; }
+    // Tagesdurchschnitte: Fenster endet heute, Tage ohne Eintrag zaehlen als 0
+    var avgTxt='';
+    if (diary.length){
+      var first=diary[0].date, lastD=diary[0].date;
+      for (var a=1;a<diary.length;a++){
+        if (diary[a].date<first) first=diary[a].date;
+        if (diary[a].date>lastD) lastD=diary[a].date;
+      }
+      var endD = (todayISO()>lastD) ? todayISO() : lastD;
+      function daysBetween(x,y){
+        var px=x.split('-'), py=y.split('-');
+        var dx=Date.UTC(+px[0],+px[1]-1,+px[2]), dy=Date.UTC(+py[0],+py[1]-1,+py[2]);
+        return Math.round((dy-dx)/86400000)+1;              // inklusive
+      }
+      var span = daysBetween(first, endD);
+      function avgOver(n){
+        var from = isoAddDays(endD, -(n-1)), s=0;
+        for (var q=0;q<diary.length;q++) if (diary[q].date>=from && diary[q].date<=endD) s+=diary[q].d;
+        return s/n;
+      }
+      var nLong = Math.min(30, span), nShort = Math.min(7, span);
+      if (span<=7){
+        avgTxt = '\u00d8 alle '+span+' d: '+fmtInt(Math.round(avgOver(span)/100)*100)+' IE/d';
+      } else {
+        avgTxt = '\u00d87 '+fmtInt(Math.round(avgOver(nShort)/100)*100)+
+          ' \u00b7 '+(span<30 ? '\u00d8 alle '+nLong : '\u00d830')+' '+
+          fmtInt(Math.round(avgOver(nLong)/100)*100)+' IE/d';
+      }
+    }
     if (lv && lv.today !== null && lv.today !== undefined){
       var wq=+sW.value, Vq=+sV.value, hq=+sH.value;
       var kq = vhOn ? fVH(lv.today)/Vq : LN2/hq;
@@ -604,11 +633,11 @@
     } else {
       $('dHalt').textContent = '';
     }
-    $('dsumL').textContent = diary.length+' Eintr\u00e4ge';
+    $('dsumL').textContent = diary.length+' Eintr\u00e4ge \u00b7 \u03a93 '+fmtInt(so)+' mg';
     $('dnote').textContent = storageOk
       ? 'gespeichert auf diesem Ger\u00e4t (localStorage)'
       : 'Vorschau: nur diese Sitzung \u2013 auf GitHub Pages wird dauerhaft gespeichert';
-    $('dsumR').textContent = '\u03a3 '+fmtInt(sd)+' IE \u00b7 \u03a93 '+fmtInt(so)+' mg';
+    $('dsumR').textContent = avgTxt;
   }
   function todayISO(){
     var n=new Date();
