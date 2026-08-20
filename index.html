@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.34</title>
+<title>VitD-Kinetik v1.35</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -154,7 +154,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.34</small></h1>
+  <h1>VitD-Kinetik<small>v1.35</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -490,7 +490,7 @@
       return f;
     }
     var byDate={};
-    for (var i=0;i<diary.length;i++) byDate[diary[i].date]=diary[i].d;
+    for (var i=0;i<diary.length;i++) byDate[diary[i].date]=(byDate[diary[i].date]||0)+diary[i].d;
     var last=c0set.date;
     for (var d in byDate){ if(d>last) last=d; }
     var today=todayISO(); if(today>last) last=today;
@@ -535,7 +535,7 @@
     s+='<line x1="'+ML+'" y1="'+(H-MB)+'" x2="'+(W-MR)+'" y2="'+(H-MB)+'" stroke="#2d333b"/>';
     s+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(H-MB)+'" stroke="#2d333b"/>';
     // Balken fuer die Tagesdosen (Hintergrund)
-    var byDate={}; for (var q=0;q<diary.length;q++) byDate[diary[q].date]=diary[q].d;
+    var byDate={}; for (var q=0;q<diary.length;q++) byDate[diary[q].date]=(byDate[diary[q].date]||0)+diary[q].d;
     var dmax=0; for (var q2 in byDate) if (byDate[q2]>dmax) dmax=byDate[q2];
     if (dmax>0){
       var bw=Math.max(2,(W-ML-MR)/days.length*0.55);
@@ -569,8 +569,10 @@
       var e=diary[i];
       var cell='\u2013';
       if (lv && lv.levels[e.date]!==undefined) cell=fmt1(lv.levels[e.date]);
+      var nSame=0;
+      for (var z=0;z<diary.length;z++) if (diary[z].date===e.date) nSame++;
       var btn = (i===pendingDel)
-        ? '<button type="button" class="confirm" data-i="'+i+'">l\u00f6schen?</button>'
+        ? '<button type="button" class="confirm" data-i="'+i+'">'+(nSame>1?'Tag ('+nSame+')?':'l\u00f6schen?')+'</button>'
         : '<button type="button" data-i="'+i+'">\u2715</button>';
       out+='<div class="drow"><span>'+fmtDate(e.date)+'</span><span>'+(e.d?fmtInt(e.d)+' IE':'\u2013')+
            '</span><span>'+(e.o?fmtInt(e.o):'\u2013')+'</span><span>'+cell+'</span>'+btn+'</div>';
@@ -785,16 +787,21 @@
   // iOS: nach dem Schliessen der Tastatur verschiebt sich das Layout und das
   // click-Event auf einem Button geht verloren -> auf pointerdown reagieren.
   function onTap(el, fn){
-    var last = 0;
-    function fire(ev){
-      var now = Date.now();
-      if (now - last < 400) return;
-      last = now;
+    // pointerdown fuehrt aus; das nachfolgende click desselben Taps wird
+    // unterdrueckt. Kein Zeitfenster -> schnelle Doppeltipps zaehlen doppelt.
+    var viaPointer = false, clearId = null;
+    el.addEventListener('pointerdown', function(ev){
+      viaPointer = true;
+      if (clearId) clearTimeout(clearId);
+      clearId = setTimeout(function(){ viaPointer = false; }, 700);
       if (ev && ev.preventDefault) ev.preventDefault();
       fn();
-    }
-    el.addEventListener('pointerdown', fire);
-    el.addEventListener('click', fire);
+    });
+    el.addEventListener('click', function(ev){
+      if (viaPointer) return;                 // schon per pointerdown erledigt
+      if (ev && ev.preventDefault) ev.preventDefault();
+      fn();
+    });
   }
 
   function groupDigits(el){
@@ -869,7 +876,7 @@
   function prefillFromLast(){
     if (!diary.length) return;
     var newest = diary[0];
-    for (var i=1;i<diary.length;i++) if (diary[i].date > newest.date) newest = diary[i];
+    for (var i=1;i<diary.length;i++) if (diary[i].date >= newest.date) newest = diary[i];
     $('diD').value = newest.d ? newest.d.toLocaleString('de-DE') : '';
     $('diO').value = newest.o ? newest.o.toLocaleString('de-DE') : '';
   }
@@ -904,10 +911,9 @@
     var dt = diDateISO || todayISO();
     var dv = parseNum($('diD'));
     var ov = parseNum($('diO'));
-    // gleicher Tag: Eintrag ergaenzen statt Duplikat
-    var hit=null;
-    for (var i=0;i<diary.length;i++){ if (diary[i].date===dt){ hit=diary[i]; break; } }
-    if (hit){ hit.d+=dv; hit.o+=ov; } else { diary.push({date:dt, d:dv, o:ov}); }
+    // Mehrere Eintraege pro Tag bleiben eigene Zeilen; die Berechnung
+    // summiert sie tageweise auf.
+    diary.push({date:dt, d:dv, o:ov});
     diarySave();
     prefillFromLast();
     if (dt === diDateISO && dt < todayISO()){ diDateISO = isoAddDays(dt,1); showDate(); }
@@ -922,9 +928,12 @@
     var t = ev.target;
     if (t && t.getAttribute && t.getAttribute('data-i')!==null){
       var i = +t.getAttribute('data-i');
-      if (i === pendingDel){                 // zweiter Tipp: wirklich loeschen
+      if (i === pendingDel){                 // zweiter Tipp: ganzen Tag loeschen
         clearPending();
-        diary.splice(i, 1);
+        var day = diary[i] && diary[i].date;
+        if (day){
+          for (var j=diary.length-1;j>=0;j--) if (diary[j].date===day) diary.splice(j,1);
+        }
         diarySave();
         renderDiary();
       } else {                               // erster Tipp: Bestaetigung anbieten
