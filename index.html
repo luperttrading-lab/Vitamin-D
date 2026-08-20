@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.18</title>
+<title>VitD-Kinetik v1.31</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,11 +35,11 @@
   #plateauHead{font-size:13px;color:var(--amber);font-variant-numeric:tabular-nums;
     min-width:118px;text-align:right;font-weight:600}
 
-  #tabs{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;height:30px;margin-bottom:6px}
-  #viewDiary{flex:1 1 auto;display:none;flex-direction:column;min-height:0}
+  #tabs{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5px;height:30px;margin-bottom:6px}
+  #viewDiary{flex:0 0 auto;display:none;flex-direction:column}
   .din{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:38px;margin-bottom:6px}
   .din input{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);
-    font-family:inherit;font-size:13px;padding:0 8px;min-width:0;-webkit-appearance:none}
+    font-family:inherit;font-size:16px;padding:0 8px;min-width:0;-webkit-appearance:none}
   #diDate{display:flex;align-items:center;justify-content:space-between;
     background:var(--panel);border:1px solid var(--line);border-radius:8px;
     color:var(--fg);font-size:13px;font-variant-numeric:tabular-nums;
@@ -48,11 +48,28 @@
   #diDate .arr{display:flex;flex-direction:column;line-height:7px;font-size:8px;color:var(--dim)}
   .din button{background:#1c2128;border:1px solid var(--amber);border-radius:8px;color:var(--amber);
     font-size:18px;font-weight:700;width:42px;font-family:inherit}
-  .dhead{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;font-size:10px;color:var(--dim);
+  .dhead{display:grid;grid-template-columns:1.1fr 1fr 0.9fr 0.9fr auto;gap:5px;font-size:10px;color:var(--dim);
     padding:0 2px 4px}
+  #dstart{display:grid;grid-template-columns:1fr 1.25fr 1.15fr;gap:6px;height:34px;margin-bottom:6px;align-items:stretch}
+  #diC0Date{display:flex;align-items:center;justify-content:space-between;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--fg);font-size:13px;font-variant-numeric:tabular-nums;
+    padding:0 8px;touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}
+  #diC0Date *{pointer-events:none}
+  #diC0Date .arr{display:flex;flex-direction:column;line-height:7px;font-size:8px;color:var(--dim)}
+  .drow button.confirm{width:auto;padding:0 10px;color:#0d1117;background:#f08080;border-radius:7px;font-size:12px;font-weight:700}
+  #dstart input{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);
+    font-family:inherit;font-size:16px;padding:0 8px;min-width:0;-webkit-appearance:none}
+  #dstart button{background:#1c2128;border:1px solid var(--line);border-radius:8px;color:var(--dim);
+    font-size:11px;font-family:inherit;padding:0 4px}
+  #dstart button.set{border-color:#7ee2a8;color:#7ee2a8}
+  #dToday{color:var(--amber);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
   .dhead span:last-child{width:42px}
-  #dlist{flex:1 1 auto;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
-  .drow{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:34px;align-items:center;
+  #dlist{flex:0 0 auto}
+  #dchartWrap{flex:0 0 auto;height:150px;position:relative;margin-bottom:8px;display:none}
+  #dchartWrap.on{display:block}
+  #dchart{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .drow{display:grid;grid-template-columns:1.1fr 1fr 0.9fr 0.9fr auto;gap:5px;height:34px;align-items:center;
     border-bottom:1px solid var(--line);font-size:13px;font-variant-numeric:tabular-nums}
   .drow button{background:none;border:none;color:var(--red,#f08080);font-size:15px;width:42px;font-family:inherit}
   #dsum{flex:0 0 auto;height:34px;display:flex;align-items:center;justify-content:space-between;
@@ -67,7 +84,7 @@
     width:100%;max-width:420px;max-height:70vh;display:flex;flex-direction:column;padding:12px;gap:8px}
   #ovlBox h2{font-size:13px;color:var(--fg)}
   #ovlTxt{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg);
-    font-family:ui-monospace,monospace;font-size:11px;padding:8px;min-height:140px;resize:none}
+    font-family:ui-monospace,monospace;font-size:16px;padding:8px;min-height:140px;resize:none}
   #ovlClose{background:#1c2128;border:1px solid var(--amber);border-radius:8px;color:var(--amber);
     font-size:13px;font-weight:600;font-family:inherit;height:36px}
   #tabs button{
@@ -82,12 +99,15 @@
     color:var(--dim);font-size:11px;font-weight:600;font-family:inherit;
   }
   #toggles button.on{color:#c9a0ff;border-color:#c9a0ff;background:#1c2128}
-  #toggles{grid-template-columns:1fr 1fr 1fr}
+  #toggles{grid-template-columns:1fr 1fr 1fr 1fr}
+  #tgVH.on{color:#7ee2a8;border-color:#7ee2a8}
   #tgStop.on{color:#f08080;border-color:#f08080}
   #tgLoad.on{color:#f0a500;border-color:#f0a500}
   footer.warn{color:#f08080;font-weight:600}
 
-  #chartWrap{flex:1 1 auto;min-height:150px;position:relative}
+  #scroller{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;touch-action:pan-y;display:flex;flex-direction:column}
+  #chartWrap{flex:0 0 auto;height:225px;position:relative}
   svg{position:absolute;inset:0;width:100%;height:100%;display:block}
   .axis{stroke:var(--line);stroke-width:1}
   .gridline{stroke:var(--line);stroke-width:.5;opacity:.6}
@@ -108,7 +128,7 @@
   .ctl .row{display:flex;justify-content:space-between;align-items:baseline;height:16px}
   .ctl .name{font-size:12px;color:var(--dim)}
   .ctl .value{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
-      min-width:110px;text-align:right}
+      min-width:124px;text-align:right}
   input[type=range]{
     -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;
     touch-action:pan-x;
@@ -124,31 +144,35 @@
   .ctl.c-extra input[type=range]::-webkit-slider-thumb{background:#7ee2a8}
   .ctl.c-load input[type=range]::-webkit-slider-thumb{background:#f0a500}
 
-  footer{flex:0 0 auto;font-size:9px;color:var(--dim);transition:color .15s;text-align:center;padding-top:4px;
-    font-variant-numeric:tabular-nums;height:16px;overflow:hidden;white-space:nowrap}
+  footer{flex:0 0 auto;position:sticky;top:0;z-index:6;background:var(--bg);
+    font-size:10px;color:var(--dim);transition:color .15s;text-align:center;
+    font-variant-numeric:tabular-nums;height:18px;line-height:18px;overflow:hidden;white-space:nowrap;
+    border-bottom:1px solid var(--line)}
 </style>
 </head>
 <body>
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.18</small></h1>
+  <h1>VitD-Kinetik<small>v1.31</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
 <div id="tabs">
   <button id="tabVerlauf" class="on" type="button">Verlauf</button>
-  <button id="tabDosis" type="button">Dosis→Spiegel</button>
-  <button id="tabBilanz" type="button">Bilanz</button>
   <button id="tabDiary" type="button">Tagebuch</button>
 </div>
 
+<div id="scroller">
 <div id="viewChart" style="display:contents">
 <div id="toggles">
+  <button id="tgVH" type="button">v.Helden</button>
   <button id="tgDamp" type="button">Puffer</button>
   <button id="tgLoad" type="button">Aufdos.</button>
   <button id="tgStop" type="button">Stopp</button>
 </div>
+
+<footer id="formel">C(t) = C₀·e^(−kt) + ΔC∞·(1−e^(−kt))</footer>
 
 <div id="chartWrap">
   <svg id="chart" viewBox="0 0 360 260" preserveAspectRatio="none" aria-label="Spiegelverlauf" style="touch-action:none"></svg>
@@ -171,11 +195,11 @@
   </div>
   <div class="ctl c-load off" id="ctlLD">
     <div class="row"><span class="name">Aufdosierung: Tagesdosis</span><span class="value" id="vLD">20.000 IE</span></div>
-    <input type="range" id="sLD" min="5000" max="50000" step="1000" value="20000">
+    <input type="range" id="sLD" min="1000" max="50000" step="1000" value="20000">
   </div>
   <div class="ctl c-load off" id="ctlLT">
     <div class="row"><span class="name">Aufdosierung: Dauer</span><span class="value" id="vLT">10 Tage</span></div>
-    <input type="range" id="sLT" min="1" max="30" step="1" value="10">
+    <input type="range" id="sLT" min="1" max="100" step="1" value="10">
   </div>
   <div class="ctl c-load off" id="ctlLZ">
     <div class="row"><span class="name">Aufdosierung: Ziel</span><span class="value" id="vLZ">60 ng/ml</span></div>
@@ -194,15 +218,26 @@
     <input type="range" id="sC" min="0" max="60" step="1" value="26">
   </div>
   <div class="ctl c-hwz">
-    <div class="row"><span class="name">Effektive System-HWZ</span><span class="value" id="vH">60 Tage</span></div>
+    <div class="row"><span class="name">System-HWZ (Tempo)</span><span class="value" id="vH">60 Tage</span></div>
     <input type="range" id="sH" min="20" max="90" step="1" value="60">
+  </div>
+  <div class="ctl c-hwz">
+    <div class="row"><span class="name">Verteilungsfaktor V</span><span class="value" id="vV">143 · V·k 1,65</span></div>
+    <input type="range" id="sV" min="40" max="220" step="1" value="143">
   </div>
 </div>
 
-<footer id="formel">C(t) = C₀·e^(−kt) + ΔC∞·(1−e^(−kt))</footer>
 </div>
 
 <div id="viewDiary">
+  <div class="dhead" style="grid-template-columns:1fr 1.25fr 1.15fr;padding-bottom:2px">
+    <span>Messwert [ng/ml]</span><span>Startdatum</span><span id="dToday">heute ≈ –</span>
+  </div>
+  <div id="dstart">
+    <input type="text" id="diC0" inputmode="decimal" placeholder="z. B. 26,5" autocomplete="off">
+    <div id="diC0Date"><span id="diC0DateTxt">–</span><span class="arr">▲<br>▼</span></div>
+    <button id="diC0Set" type="button">setzen</button>
+  </div>
   <div class="dhead" style="padding-bottom:2px"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3 [mg]</span><span></span></div>
   <div class="din">
     <div id="diDate"><span id="diDateTxt">–</span><span class="arr">▲<br>▼</span></div>
@@ -210,10 +245,13 @@
     <input type="text" id="diO" inputmode="numeric" placeholder="z. B. 2.000" autocomplete="off">
     <button id="diAdd" type="button">+</button>
   </div>
-  <div class="dhead"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3 [mg]</span><span></span></div>
+  <div id="dchartWrap"><svg id="dchart" viewBox="0 0 360 150" preserveAspectRatio="none"></svg></div>
+  <div class="dhead"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3</span><span>≈ ng/ml</span><span></span></div>
   <div id="dlist"></div>
   <div id="dsum"><span id="dsumL">0 Einträge</span><span><span id="dsumR"></span> <button id="dExp" type="button">Export</button></span></div>
   <div id="dnote">…</div>
+</div>
+
 </div>
 
 <div id="ovl">
@@ -232,11 +270,14 @@
   var mode = 'verlauf';
   var scrubT = null;
   var dampOn = false;     // Puffer unten: k faellt bei niedrigem C
+  var vhOn   = false;     // von-Helden-Simulator-Fit: Verbrauch waechst linear mit C
+  // Aus 3 Simulator-Ablesungen: D/(kg*C) = 1,00@30 / 1,29@70 / 1,85@144 ng/ml
+  function fVH(c){ return 0.7763 + 0.007456*c; }
   var loadOn = false;     // Aufdosierungsphase aktiv
   var stopOn = false;     // Einnahmestopp aktiv
-  var VK = 1.65;          // Anker: V*k [IE/(kg*ng/ml*Tag)] aus Steady-State-Studien.
-                          // V wird aus der HWZ mitgefuehrt: V = VK/(ln2/HWZ).
-                          // HWZ 60 d -> V=143 (von Helden), HWZ 42 d -> V=100 (van Groningen).
+  // V und HWZ sind FREI einstellbar. Studienlage: Produkt V*k in ~1,1-1,9;
+  // ausserhalb warnt die Fusszeile. VK dient nur noch der Tagebuch-Kompat.
+  var VK_LO = 1.1, VK_HI = 1.9;
 
   var C_DAMP = 10;        // ng/ml: hier halbiert sich k  [Vermutung, gesetzter Anker]
   // V=100 (van Groningen, an Patientendaten gefittet) zusammen mit der
@@ -244,12 +285,12 @@
   // die laenger ist als die reine Tracer-HWZ von 25(OH)D (15-25 d).
 
   var $ = function(id){ return document.getElementById(id); };
-  var sW=$('sW'), sD=$('sD'), sE=$('sE'), sC=$('sC'), sH=$('sH'), sLD=$('sLD'), sLT=$('sLT'), sLZ=$('sLZ'), sST=$('sST');
+  var sW=$('sW'), sD=$('sD'), sE=$('sE'), sC=$('sC'), sH=$('sH'), sV=$('sV'), sLD=$('sLD'), sLT=$('sLT'), sLZ=$('sLZ'), sST=$('sST');
   var svg=$('chart');
 
   // Modell -------------------------------------------------------------
   // dC/dt = gross - k(C)*C ,  gross = (Dosis+Sonstige)/(100*kg)
-  function model(w, dose, extra, c0, hwz, damp, V, load){
+  function model(w, dose, extra, c0, hwz, damp, V, load, vh){
     var k0 = LN2/hwz;
     var gross = (dose+extra)/(V*w);                    // Erhaltungsphase
     var grossL = load ? (load.dose+extra)/(V*w) : gross;  // Aufdosierphase
@@ -258,7 +299,7 @@
     var grossS = extra/(V*w);                              // nach Stopp nur Sonne/Nahrung
 
     function kOf(c){
-      var f = k0;
+      var f = vh ? fVH(c)/V : k0;    // vh: Plateau exakt D = w*C*fVH(C); Tempo aus V
       if (damp) f *= (c*c)/(c*c + C_DAMP*C_DAMP);
       return f;
     }
@@ -399,121 +440,9 @@
     svg.innerHTML = s;
   }
 
-  // Ansicht 2: Tagesbilanz, x fix 0..100 ng/ml -------------------------
-  function drawBilanz(m, mRef, c0, showRef){
-    var xmaxC = 100;
-    // y-Bereich um den Nulldurchgang herum fokussieren: die extreme
-    // Abbaurate am rechten Rand darf die Skala nicht sprengen (v1.4-Fix)
-    var yTop = Math.max(m.gross, 0.3)*1.15;
-    var yBot = Math.max(Math.min(m.rate(xmaxC)*1.1, -yTop*0.6), -yTop*2.2);
-    function bx(c){ return ML + (VW-ML-MR)*c/xmaxC; }
-    function by(r){ return MT + (VH-MT-MB)*(yTop - r)/(yTop - yBot); }
-    function clampY(r){ return Math.max(yBot, Math.min(yTop, r)); }
-    // fuer den Kurvenzug weiter clampen, damit sie sichtbar aus dem Plot laeuft
-    function clipY(r){ var pad=(yTop-yBot); return Math.max(yBot-pad, Math.min(yTop+pad, r)); }
-
-    var s='';
-    s+='<defs><clipPath id="plot2"><rect x="'+ML+'" y="'+MT+'" width="'+(VW-ML-MR)+'" height="'+(VH-MT-MB)+'"/></clipPath></defs>';
-    s+='<rect x="'+bx(0)+'" y="'+MT+'" width="'+(bx(20)-bx(0))+'" height="'+(VH-MT-MB)+'" fill="#8b1e1e" opacity="0.18"/>';
-    s+='<rect x="'+bx(30)+'" y="'+MT+'" width="'+(bx(100)-bx(30))+'" height="'+(VH-MT-MB)+'" fill="#1e6e3a" opacity="0.12"/>';
-    s+='<text class="zonelabel" x="'+bx(10)+'" y="'+(VH-MB-5)+'" text-anchor="middle" fill="#f08080">Mangel</text>';
-    s+='<text class="zonelabel" x="'+bx(85)+'" y="'+(VH-MB-5)+'" text-anchor="middle" fill="#7ee2a8">Ziel 30&#8211;100</text>';
-
-    for(var cv=0; cv<=xmaxC; cv+=20){
-      s+='<line class="gridline" x1="'+bx(cv)+'" y1="'+MT+'" x2="'+bx(cv)+'" y2="'+(VH-MB)+'"/>';
-      s+='<text class="ticktext" x="'+bx(cv)+'" y="'+(VH-MB+12)+'" text-anchor="middle">'+cv+'</text>';
-    }
-    // Schrittweite aus dem Bereich ableiten -> immer ca. 6-8 Linien
-    var span = yTop - yBot, raw = span/7;
-    var mag = Math.pow(10, Math.floor(Math.log(raw)/Math.LN10));
-    var rstep = (raw/mag < 1.5 ? 1 : raw/mag < 3.5 ? 2 : raw/mag < 7.5 ? 5 : 10) * mag;
-    for(var rv=Math.ceil(yBot/rstep)*rstep; rv<=yTop+0.001; rv+=rstep){
-      s+='<line class="gridline" x1="'+ML+'" y1="'+by(rv)+'" x2="'+(VW-MR)+'" y2="'+by(rv)+'"/>';
-      s+='<text class="ticktext" x="'+(ML-4)+'" y="'+(by(rv)+3)+'" text-anchor="end">'+(Math.abs(rv)<1e-9?0:rv).toLocaleString('de-DE',{maximumFractionDigits:(rstep<0.5?2:rstep<1?1:0)})+'</text>';
-    }
-    s+='<line x1="'+ML+'" y1="'+by(0)+'" x2="'+(VW-MR)+'" y2="'+by(0)+'" stroke="#e6edf3" stroke-width="1" opacity="0.55"/>';
-    s+='<line class="axis" x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(VH-MB)+'"/>';
-    s+='<line class="axis" x1="'+ML+'" y1="'+(VH-MB)+'" x2="'+(VW-MR)+'" y2="'+(VH-MB)+'"/>';
-
-    // lineare Referenzgerade
-    if (showRef){
-      var pr='';
-      for(var q=0;q<=120;q++){ var ccr=xmaxC*q/120;
-        pr += (q===0?'M':'L') + bx(ccr).toFixed(1) + ',' + by(clipY(mRef.rate(ccr))).toFixed(1); }
-      s+='<path d="'+pr+'" fill="none" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="4 3" clip-path="url(#plot2)"/>';
-    }
-    // Bilanzkurve (bei aktiven Termen gekruemmt)
-    var p='';
-    for(var i=0;i<=120;i++){
-      var cc = xmaxC*i/120;
-      p += (i===0?'M':'L') + bx(cc).toFixed(1) + ',' + by(clipY(m.rate(cc))).toFixed(1);
-    }
-    s+='<path d="'+p+'" fill="none" stroke="#f0a500" stroke-width="2.6" stroke-linecap="round" clip-path="url(#plot2)"/>';
-
-    if (m.plateau <= xmaxC){
-      s+='<circle cx="'+bx(m.plateau)+'" cy="'+by(0)+'" r="4" fill="#0d1117" stroke="#f0a500" stroke-width="2"/>';
-      s+='<text x="'+bx(m.plateau)+'" y="'+(by(0)+16)+'" text-anchor="middle" fill="#f0a500" font-size="10" font-weight="600">Plateau '+fmt1(m.plateau)+'</text>';
-    }
-    var r0 = m.rate(c0);
-    s+='<circle cx="'+bx(c0)+'" cy="'+by(clampY(r0))+'" r="4.6" fill="#58a6ff" stroke="#0d1117" stroke-width="1.4"/>';
-    var anch = c0 < xmaxC*0.6 ? 'start' : 'end';
-    var xT = c0 < xmaxC*0.6 ? bx(c0)+8 : bx(c0)-8;
-    var yLab = Math.max(MT+12, by(clampY(r0))-8);
-    s+='<text x="'+xT+'" y="'+yLab+'" text-anchor="'+anch+'" fill="#58a6ff" font-size="11" font-weight="600">Start: '+(r0>=0?'+':'&#8722;')+fmt2(Math.abs(r0))+' ng/ml/Tag</text>';
-    s+='<text class="ticktext" x="'+(VW-MR)+'" y="'+(VH-2)+'" text-anchor="end">aktueller Spiegel [ng/ml]</text>';
-    svg.innerHTML = s;
-  }
-
-  // Ansicht 3: Dosis -> Spiegel (x = Tagesdosis IE, y = Plateau ng/ml) --
-  function drawDosis(w, extra, c0, hwz, damp, V, curDose){
-    var xmaxD = 20000, ymax = 100;
-    function dx(D){ return ML + (VW-ML-MR)*D/xmaxD; }
-    function dy(v){ return MT + (VH-MT-MB)*(1 - v/ymax); }
-    function plateauOf(D){ return model(w, D, extra, c0, hwz, damp, V, null).plateau; }
-
-    var s='';
-    s+='<defs><clipPath id="plot3"><rect x="'+ML+'" y="'+MT+'" width="'+(VW-ML-MR)+'" height="'+(VH-MT-MB)+'"/></clipPath></defs>';
-    // Zonen horizontal wie im Verlauf
-    s+='<rect x="'+ML+'" y="'+dy(20)+'" width="'+(VW-ML-MR)+'" height="'+(dy(0)-dy(20))+'" fill="#8b1e1e" opacity="0.20"/>';
-    s+='<rect x="'+ML+'" y="'+dy(100)+'" width="'+(VW-ML-MR)+'" height="'+(dy(30)-dy(100))+'" fill="#1e6e3a" opacity="0.14"/>';
-    s+='<text class="zonelabel" x="'+(VW-MR-3)+'" y="'+(dy(10)+3)+'" text-anchor="end" fill="#f08080">Mangel &lt;20</text>';
-    s+='<text class="zonelabel" x="'+(VW-MR-3)+'" y="'+(dy(95)+3)+'" text-anchor="end" fill="#7ee2a8">Ziel 30&#8211;100</text>';
-
-    for(var yv=0; yv<=100.001; yv+=20){
-      s+='<line class="gridline" x1="'+ML+'" y1="'+dy(yv)+'" x2="'+(VW-MR)+'" y2="'+dy(yv)+'"/>';
-      s+='<text class="ticktext" x="'+(ML-4)+'" y="'+(dy(yv)+3)+'" text-anchor="end">'+yv+'</text>';
-    }
-    for(var dv=0; dv<=xmaxD; dv+=5000){
-      s+='<line class="gridline" x1="'+dx(dv)+'" y1="'+MT+'" x2="'+dx(dv)+'" y2="'+(VH-MB)+'"/>';
-      var ta = (dv===xmaxD) ? 'end' : 'middle';
-      s+='<text class="ticktext" x="'+dx(dv)+'" y="'+(VH-MB+12)+'" text-anchor="'+ta+'">'+fmtInt(dv)+'</text>';
-    }
-    s+='<line class="axis" x1="'+ML+'" y1="'+(VH-MB)+'" x2="'+(VW-MR)+'" y2="'+(VH-MB)+'"/>';
-    s+='<line class="axis" x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(VH-MB)+'"/>';
-
-    // Plateau-Kurve ueber der Dosis
-    var p='';
-    for(var i=0;i<=60;i++){
-      var D = xmaxD*i/60;
-      p += (i===0?'M':'L') + dx(D).toFixed(1) + ',' + dy(Math.min(ymax*1.3, plateauOf(D))).toFixed(1);
-    }
-    s+='<path d="'+p+'" fill="none" stroke="#f0a500" stroke-width="2.6" stroke-linecap="round" clip-path="url(#plot3)"/>';
-
-    // Marker: aktuelle Tagesdosis vom Regler
-    var pc = plateauOf(curDose);
-    s+='<line x1="'+dx(curDose)+'" y1="'+MT+'" x2="'+dx(curDose)+'" y2="'+(VH-MB)+'" stroke="#e6edf3" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.6"/>';
-    if (pc <= ymax){
-      s+='<circle cx="'+dx(curDose)+'" cy="'+dy(pc)+'" r="4.6" fill="#58a6ff" stroke="#0d1117" stroke-width="1.4"/>';
-    }
-    var anch = curDose < xmaxD*0.55 ? 'start' : 'end';
-    var xT = curDose < xmaxD*0.55 ? dx(curDose)+7 : dx(curDose)-7;
-    s+='<text x="'+xT+'" y="'+(MT+26)+'" text-anchor="'+anch+'" fill="#e6edf3" font-size="11" font-weight="600">'+fmtInt(curDose)+' IE \u2192 '+fmt1(pc)+' ng/ml</text>';
-    s+='<text class="ticktext" x="'+(ML+4)+'" y="'+(MT+12)+'" text-anchor="start">Tagesdosis [IE] auf x</text>';
-    svg.innerHTML = s;
-  }
-
   // Tagebuch ------------------------------------------------------------
   var diary = [];   // {date:'YYYY-MM-DD', d:IE, o:mg}
+  var pendingDel = -1;   // Zeile mit offener Loesch-Bestaetigung
   // Persistenz: localStorage wenn verfuegbar (GitHub Pages / Safari / PWA);
   // die Claude-Vorschau blockt localStorage -> Fallback nur-Sitzung.
   var STORE='vitd-tagebuch-v1';
@@ -538,6 +467,43 @@
     if(!storageOk) return;
     try { window.localStorage.setItem(STORE, JSON.stringify(diary)); } catch(e){}
   }
+  var c0set = null;   // {v: ng/ml, date: 'YYYY-MM-DD'}
+  function c0Load(){
+    if(!storageOk) return;
+    try { var raw=window.localStorage.getItem(STORE+'-c0');
+      if(raw){ var o=JSON.parse(raw); if(o && typeof o.date==='string' && +o.v>0) c0set={v:+o.v, date:o.date}; }
+    } catch(e){}
+  }
+  function c0Save(){
+    if(!storageOk) return;
+    try { window.localStorage.setItem(STORE+'-c0', JSON.stringify(c0set)); } catch(e){}
+  }
+  // Spiegelverlauf aus den Tagebuch-Eintraegen: exakter Tagesschritt
+  // C_{n+1} = Cinf_n + (C_n - Cinf_n)*e^-k, Cinf_n = (Dosis_n + Sonstige)/(1,65*kg)
+  function diaryLevels(){
+    if(!c0set) return null;
+    var w=+sW.value, hwz=+sH.value, extra=+sE.value, V=+sV.value;
+    var k0=LN2/hwz;
+    function kOf(c){
+      var f = vhOn ? fVH(c)/V : k0;
+      if (dampOn) f *= (c*c)/(c*c + C_DAMP*C_DAMP);
+      return f;
+    }
+    var byDate={};
+    for (var i=0;i<diary.length;i++) byDate[diary[i].date]=diary[i].d;
+    var last=c0set.date;
+    for (var d in byDate){ if(d>last) last=d; }
+    var today=todayISO(); if(today>last) last=today;
+    var out={}, C=c0set.v, cur=c0set.date, guard=0;
+    while (cur<=last && guard<1100){
+      var g=((byDate[cur]||0)+extra)/(V*w);
+      for (var s2=0;s2<8;s2++) C = Math.max(0, C + (1/8)*(g - kOf(C)*C));
+      out[cur]=C;
+      cur=isoAddDays(cur,1); guard++;
+    }
+    return {levels:out, today:(today>=c0set.date? out[today] : null)};
+  }
+
   function diaryCSV(){
     var out='Datum;VitaminD_IE;Omega3_mg';
     var cp=diary.slice().sort(function(a,b){ return a.date<b.date?-1:1; });
@@ -548,15 +514,77 @@
     var pt = iso.split('-');
     return pt[2]+'.'+pt[1]+'.'+pt[0].slice(2);
   }
+  function drawDiaryChart(lv){
+    var box=$('dchartWrap'), svg=$('dchart');
+    if (!lv){ box.className=''; svg.innerHTML=''; return; }
+    var days=[]; for (var d in lv.levels) days.push(d);
+    days.sort();
+    if (days.length < 2){ box.className=''; svg.innerHTML=''; return; }
+    box.className='on';
+    var W=360,H=150,ML=26,MR=6,MT=8,MB=18;
+    var ymax=Math.max(60, Math.ceil(Math.max.apply(null, days.map(function(d){return lv.levels[d];}))/20)*20);
+    function px(i){ return ML+(W-ML-MR)*i/(days.length-1); }
+    function py(v){ return MT+(H-MT-MB)*(1-v/ymax); }
+    var s='';
+    s+='<rect x="'+ML+'" y="'+py(20)+'" width="'+(W-ML-MR)+'" height="'+(py(0)-py(20))+'" fill="#8b1e1e" opacity="0.20"/>';
+    s+='<rect x="'+ML+'" y="'+py(ymax)+'" width="'+(W-ML-MR)+'" height="'+(py(30)-py(ymax))+'" fill="#1e6e3a" opacity="0.13"/>';
+    for (var yv=0; yv<=ymax+0.001; yv+=20){
+      s+='<line x1="'+ML+'" y1="'+py(yv)+'" x2="'+(W-MR)+'" y2="'+py(yv)+'" stroke="#2d333b" stroke-width="0.5" opacity="0.6"/>';
+      s+='<text class="ticktext" x="'+(ML-4)+'" y="'+(py(yv)+3)+'" text-anchor="end">'+yv+'</text>';
+    }
+    s+='<line x1="'+ML+'" y1="'+(H-MB)+'" x2="'+(W-MR)+'" y2="'+(H-MB)+'" stroke="#2d333b"/>';
+    s+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(H-MB)+'" stroke="#2d333b"/>';
+    // Balken fuer die Tagesdosen (Hintergrund)
+    var byDate={}; for (var q=0;q<diary.length;q++) byDate[diary[q].date]=diary[q].d;
+    var dmax=0; for (var q2 in byDate) if (byDate[q2]>dmax) dmax=byDate[q2];
+    if (dmax>0){
+      var bw=Math.max(2,(W-ML-MR)/days.length*0.55);
+      for (var i2=0;i2<days.length;i2++){
+        var dv=byDate[days[i2]]||0; if(!dv) continue;
+        var hh=(H-MT-MB)*0.30*dv/dmax;
+        s+='<rect x="'+(px(i2)-bw/2)+'" y="'+((H-MB)-hh)+'" width="'+bw+'" height="'+hh+'" fill="#58a6ff" opacity="0.30"/>';
+      }
+    }
+    // Spiegelkurve
+    var p='';
+    for (var i=0;i<days.length;i++) p += (i===0?'M':'L')+px(i).toFixed(1)+','+py(lv.levels[days[i]]).toFixed(1);
+    s+='<path d="'+p+'" fill="none" stroke="#f0a500" stroke-width="2.4" stroke-linecap="round"/>';
+    // Start- und Endpunkt beschriften
+    s+='<circle cx="'+px(0)+'" cy="'+py(lv.levels[days[0]])+'" r="3" fill="#f0a500"/>';
+    var last=days.length-1;
+    s+='<circle cx="'+px(last)+'" cy="'+py(lv.levels[days[last]])+'" r="4" fill="#f0a500" stroke="#0d1117" stroke-width="1.2"/>';
+    s+='<text x="'+(W-MR)+'" y="'+(MT+10)+'" text-anchor="end" fill="#e6edf3" font-size="11" font-weight="600">'+fmt1(lv.levels[days[last]])+' ng/ml</text>';
+    s+='<text class="ticktext" x="'+ML+'" y="'+(H-4)+'" text-anchor="start">'+fmtDate(days[0])+'</text>';
+    s+='<text class="ticktext" x="'+(W-MR)+'" y="'+(H-4)+'" text-anchor="end">'+fmtDate(days[last])+'</text>';
+    svg.innerHTML=s;
+  }
+
   function renderDiary(){
     diary.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+    var lv = diaryLevels();
+    drawDiaryChart(lv);
     var out='';
     for (var i=0;i<diary.length;i++){
       var e=diary[i];
+      var cell='\u2013';
+      if (lv && lv.levels[e.date]!==undefined) cell=fmt1(lv.levels[e.date]);
+      var btn = (i===pendingDel)
+        ? '<button type="button" class="confirm" data-i="'+i+'">l\u00f6schen?</button>'
+        : '<button type="button" data-i="'+i+'">\u2715</button>';
       out+='<div class="drow"><span>'+fmtDate(e.date)+'</span><span>'+(e.d?fmtInt(e.d)+' IE':'\u2013')+
-           '</span><span>'+(e.o?fmtInt(e.o)+' mg':'\u2013')+'</span><button type="button" data-i="'+i+'">\u2715</button></div>';
+           '</span><span>'+(e.o?fmtInt(e.o):'\u2013')+'</span><span>'+cell+'</span>'+btn+'</div>';
     }
     $('dlist').innerHTML = out;
+    // Startzeile + Heute
+    if (c0set){
+      $('diC0Set').className='set';
+      $('diC0Set').textContent = c0set.v.toLocaleString('de-DE')+' @ '+fmtDate(c0set.date);
+      $('dToday').textContent = (lv && lv.today!==null && lv.today!==undefined) ? 'heute \u2248 '+fmt1(lv.today) : '\u2013';
+    } else {
+      $('diC0Set').className='';
+      $('diC0Set').textContent = 'setzen';
+      $('dToday').textContent = 'heute \u2248 \u2013';
+    }
     var sd=0, so=0;
     for (var j=0;j<diary.length;j++){ sd+=diary[j].d; so+=diary[j].o; }
     $('dsumL').textContent = diary.length+' Eintr\u00e4ge';
@@ -577,31 +605,42 @@
     loadWarn = '';
     if (!loadOn) return;
     var w=+sW.value, hwz=+sH.value, C0=+sC.value, Z=+sLZ.value;
-    var k=LN2/hwz, Vw=VK*w;
+    var k=LN2/hwz;
     if (C0 >= Z){ loadWarn='Start \u2265 Ziel \u2013 keine Aufdosierung n\u00f6tig'; return; }
 
-    function doseFor(T){ var e=Math.exp(-k*T); return Vw*(Z - C0*e)/(1-e); }
+    var V = +sV.value, extra=+sE.value, damp=dampOn, vh=vhOn;
+    function endLevel(D,T){
+      return model(w, +sD.value, extra, C0, hwz, damp, V, {dose:D, days:T, stop:0}, vh).C(T);
+    }
+    function doseFor(T){                    // Bisektion: endLevel monoton in D
+      var lo=0, hi=200000;
+      for (var i=0;i<44;i++){ var mid=(lo+hi)/2;
+        if (endLevel(mid,T) < Z) lo=mid; else hi=mid; }
+      return (lo+hi)/2;
+    }
     function daysFor(D){
-      var Ci = D/Vw;                       // Plateau der Kurdosis
-      if (Ci <= Z*1.0001) return Infinity; // Kurdosis traegt das Ziel nicht
-      return -Math.log((Ci-Z)/(Ci-C0))/k;
+      if (endLevel(D,100) < Z) return Infinity;
+      var lo=0.5, hi=100;
+      for (var i=0;i<32;i++){ var mid=(lo+hi)/2;
+        if (endLevel(D,mid) < Z) lo=mid; else hi=mid; }
+      return (lo+hi)/2;
     }
     var T, D;
     if (master==='dose'){
       D=+sLD.value; T=daysFor(D);
-      if (T > 30){ T=30; D=Math.ceil(doseFor(30)/1000)*1000; }
+      if (T > 100){ T=100; D=Math.ceil(doseFor(100)/1000)*1000; }
       else if (T < 1){ T=1; D=Math.ceil(doseFor(1)/1000)*1000; }
       else T=Math.round(T);
     } else {
       T=+sLT.value; D=Math.ceil(doseFor(T)/1000)*1000;
     }
-    if (D > 50000){ D=50000; T=daysFor(D); T=Math.min(30, Math.max(1, Math.ceil(T))); }
-    if (D < 5000) D=5000;
+    if (D > 50000){ D=50000; T=daysFor(D); T=Math.min(100, Math.max(1, Math.ceil(T))); }
+    if (D < 1000) D=1000;
     // Machbarkeitspruefung am Ende
     var Tchk=daysFor(D);
-    if (Tchk===Infinity || Tchk > 30.5){
-      loadWarn='Ziel '+Z+' in \u226430 d nicht erreichbar (max 50.000 IE/d)';
-      D=50000; T=30;
+    if (Tchk===Infinity || Tchk > 100.5){
+      loadWarn='Ziel '+Z+' in \u2264100 d nicht erreichbar (max 50.000 IE/d)';
+      D=50000; T=100;
     }
     sLD.value=String(D); sLT.value=String(T);
   }
@@ -613,25 +652,25 @@
     var noLoad = loadOn && (+sC.value >= +sLZ.value);   // Start >= Ziel: nichts aufzudosieren
     var load = (loadOn || stopOn) ? {dose:(loadOn&&!noLoad?lDose:dose), days:(loadOn&&!noLoad?lDays:0),
                                      stop:(stopOn?tStop:0)} : null;
-    var V = VK / (LN2/hwz);
-    var m   = model(w,dose,extra,c0,hwz,dampOn,V,load);
+    var V = +sV.value;
+    var m   = model(w,dose,extra,c0,hwz,dampOn,V,load,vhOn);
     // Vergleichskurve: gleiche Dosis, aber reine Tracer-HWZ von 25(OH)D
     // Referenzkurve ohne Puffer-Term (fuer den Puffer-Vergleich)
-    var mRef= model(w,dose,extra,c0,hwz,false,V,load);
-    var mLo = model(w,dose,extra,c0,Math.round(hwz*2/3),dampOn,V,load);
-    var mHi = model(w,dose,extra,c0,Math.round(hwz*4/3),dampOn,V,load);
-    var showRef = dampOn;
+    var mRef= model(w,dose,extra,c0,hwz,false,V,load,false);
+    var mLo = model(w,dose,extra,c0,Math.round(hwz*2/3),dampOn,V,load,vhOn);
+    var mHi = model(w,dose,extra,c0,Math.round(hwz*4/3),dampOn,V,load,vhOn);
+    var showRef = dampOn || vhOn;
 
-    if (mode==='diary'){ /* Chart-View versteckt */ }
-    else if (mode==='verlauf') drawVerlauf(m,mLo,mHi,mRef,c0,showRef);
-    else if (mode==='dosis') drawDosis(w, extra, c0, hwz, dampOn, V, dose);
-    else drawBilanz(m,mRef,c0,showRef);
+    if (mode!=='diary') drawVerlauf(m,mLo,mHi,mRef,c0,showRef);
 
     $('vW').textContent = w+' kg';
     $('vD').textContent = fmtInt(dose)+' IE';
     $('vE').textContent = fmtInt(extra)+' IE';
     $('vC').textContent = c0+' ng/ml';
     $('vH').textContent = hwz+' Tage';
+    var prod = V*LN2/hwz;
+    $('vV').textContent = Math.round(V)+' \u00b7 V\u00b7k '+prod.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+
+      ((prod<VK_LO||prod>VK_HI)?' \u26a0':'');
     $('vLD').textContent = fmtInt(lDose)+' IE';
     $('vLT').textContent = lDays+' Tage';
     $('vLZ').textContent = sLZ.value+' ng/ml';
@@ -692,6 +731,7 @@
     }
 
     $('tgDamp').className = dampOn ? 'on' : '';
+    $('tgVH').className = vhOn ? 'on' : '';
 
     var warn = m.peak > 100;
     $('formel').className = warn ? 'warn' : '';
@@ -701,16 +741,23 @@
       $('formel').className = 'warn';
       $('formel').textContent = '\u26a0 '+loadWarn;
     } else if (loadOn){
-      var halt = Math.round(VK*w*(+sLZ.value)/100)*100;
-      $('formel').textContent = 'Kur: '+fmtInt(lDose)+' IE \u00d7 '+lDays+' d \u2192 Ziel '+sLZ.value+
-        ' \u00b7 Erhaltung danach '+fmtInt(halt)+' IE/d';
+      var S = (lDose+extra)*lDays;                                  // Gesamtzufuhr der Kur
+      var fill = Math.max(0, Math.min(S, V*w*(m.C(lDays)-c0)));     // Anhebung des Bestands
+      var pF = Math.round(100*fill/S), pH = 100-pF;
+      $('formel').textContent = '\u03a3 '+fmtInt(S)+' IE \u00b7 Auff\u00fcllen '+pF+' % ('+fmtInt(fill)+
+        ') \u00b7 Halten '+pH+' % ('+fmtInt(S-fill)+')';
     } else if (stopOn){
       $('formel').textContent = 'Stopp Tag '+tStop+' \u00b7 danach Abbau, HWZ '+hwz+' d'+
         (extra>0 ? ', Rest-Plateau '+fmt1((extra/(V*w))/(LN2/hwz)) : ', Richtung 0')+' \u00b7 C(120) = '+fmt1(m.C(TDAYS));
+    } else if (vhOn){
+      $('formel').textContent = 'v.Helden-Fit: D = kg\u00b7C\u00b7(0,78+0,0075\u00b7C) \u00b7 Plateau '+fmt1(m.plateau)+' statt '+fmt1(mRef.plateau)+' (linear)';
     } else if (dampOn){
       $('formel').textContent = 'Puffer unter '+C_DAMP+' \u00b7 Plateau '+fmt1(m.plateau)+' statt '+fmt1(mRef.plateau)+' ng/ml (ohne)';
     } else {
-      $('formel').textContent = '\u0394C\u221e = '+fmtInt(dose+extra)+'/(1,65\u00b7'+w+') = '+fmt1(m.plateau)+' ng/ml \u00b7 V = '+Math.round(V)+' bei HWZ '+hwz+' d';
+      var pr2 = V*LN2/hwz;
+      $('formel').className = (pr2<VK_LO||pr2>VK_HI) ? 'warn' : '';
+      $('formel').textContent = (pr2<VK_LO||pr2>VK_HI ? '\u26a0 V\u00b7k '+fmt2(pr2)+' au\u00dferhalb Studienband 1,1\u20131,9 \u00b7 ' : '')+
+        '\u0394C\u221e = '+fmtInt(dose+extra)+'/('+Math.round(V)+'\u00b7'+w+'\u00b7k) = '+fmt1(m.plateau)+' ng/ml';
     }
   }
 
@@ -718,16 +765,12 @@
   function setMode(mo){
     mode = mo; scrubT = null;
     $('tabVerlauf').className = (mo==='verlauf')?'on':'';
-    $('tabDosis').className   = (mo==='dosis')?'on':'';
-    $('tabBilanz').className  = (mo==='bilanz')?'on':'';
     $('tabDiary').className   = (mo==='diary')?'on':'';
     $('viewChart').style.display = (mo==='diary') ? 'none' : 'contents';
     $('viewDiary').style.display = (mo==='diary') ? 'flex' : 'none';
     if (mo==='diary'){ renderDiary(); } else { render(); }
   }
   $('tabVerlauf').addEventListener('click', function(){ setMode('verlauf'); });
-  $('tabDosis').addEventListener('click', function(){ setMode('dosis'); });
-  $('tabBilanz').addEventListener('click', function(){ setMode('bilanz'); });
   $('tabDiary').addEventListener('click', function(){ setMode('diary'); });
 
   // Tagebuch-Interaktion
@@ -755,6 +798,9 @@
   var dateDrag=false, dateY0=0, dateISO0='';
   var PXPERDAY=22;
   var lastTap=0, dateMoved=false;
+  var c0DateISO = todayISO();
+  var c0Drag=false, c0Y0=0, c0ISO0='', c0LastTap=0;
+  function showC0Date(){ $('diC0DateTxt').textContent = fmtDate(c0DateISO); }
   $('diDate').addEventListener('touchstart', function(){ dateDrag=true; }, {passive:true});
   $('diDate').addEventListener('pointerdown', function(ev){
     dateDrag=true; dateY0=ev.clientY; dateISO0=diDateISO; dateMoved=false;
@@ -768,21 +814,57 @@
     }
     ev.preventDefault();
   });
-  document.addEventListener('pointermove', function(ev){
-    if(!dateDrag || dateISO0==='') return;
-    if (Math.abs(ev.clientY - dateY0) > 8){ dateMoved=true; lastTap=0; }
-    var steps = Math.round((dateY0 - ev.clientY)/PXPERDAY);
-    var next = isoAddDays(dateISO0, steps);
-    if (next !== diDateISO){ diDateISO = next; showDate(); }
+  $('diC0Date').addEventListener('touchstart', function(){ c0Drag=true; }, {passive:true});
+  $('diC0Date').addEventListener('pointerdown', function(ev){
+    c0Drag=true; c0Y0=ev.clientY; c0ISO0=c0DateISO;
+    var now = Date.now();
+    if (now - c0LastTap < 350){ c0DateISO = todayISO(); showC0Date(); c0ISO0=c0DateISO; c0LastTap=0; }
+    else c0LastTap = now;
+    ev.preventDefault();
   });
-  document.addEventListener('pointerup', function(){ dateDrag=false; dateISO0=''; });
-  document.addEventListener('pointercancel', function(){ dateDrag=false; dateISO0=''; });
-  document.addEventListener('touchend', function(){ dateDrag=false; }, {passive:true});
+  document.addEventListener('pointermove', function(ev){
+    if (dateDrag && dateISO0!==''){
+      if (Math.abs(ev.clientY - dateY0) > 8){ dateMoved=true; lastTap=0; }
+      var steps = Math.round((dateY0 - ev.clientY)/PXPERDAY);
+      var next = isoAddDays(dateISO0, steps);
+      if (next !== diDateISO){ diDateISO = next; showDate(); }
+    }
+    if (c0Drag && c0ISO0!==''){
+      if (Math.abs(ev.clientY - c0Y0) > 8) c0LastTap=0;
+      var st2 = Math.round((c0Y0 - ev.clientY)/PXPERDAY);
+      var nx2 = isoAddDays(c0ISO0, st2);
+      if (nx2 !== c0DateISO){ c0DateISO = nx2; showC0Date(); }
+    }
+  });
+  document.addEventListener('pointerup', function(){ dateDrag=false; dateISO0=''; c0Drag=false; c0ISO0=''; });
+  document.addEventListener('pointercancel', function(){ dateDrag=false; dateISO0=''; c0Drag=false; c0ISO0=''; });
+  document.addEventListener('touchend', function(){ dateDrag=false; c0Drag=false; }, {passive:true});
   document.addEventListener('touchmove', function(ev){
-    if (dateDrag) ev.preventDefault();
+    if (dateDrag || c0Drag) ev.preventDefault();
   }, {passive:false});
 
   diaryLoad();
+  c0Load();
+  if (c0set) c0DateISO = c0set.date;
+  showC0Date();
+  function decFormat(el){
+    var raw = String(el.value).replace(/[^0-9,\.]/g,'').replace(/\./g,',');
+    var parts = raw.split(',');
+    var out = parts[0].slice(0,3);
+    if (parts.length > 1) out += ',' + parts.slice(1).join('').slice(0,1);
+    el.value = out;
+  }
+  function parseDec(el){
+    var v = parseFloat(String(el.value).replace(',','.'));
+    return (isFinite(v) && v>0) ? Math.round(v*10)/10 : 0;
+  }
+  $('diC0').addEventListener('input', function(){ decFormat($('diC0')); });
+  $('diC0Set').addEventListener('click', function(){
+    var v = parseDec($('diC0'));
+    if (v>0){ c0set={v:v, date:c0DateISO}; $('diC0').value=''; }
+    else if (c0set){ c0set=null; }         // leer + Tipp = Start loeschen
+    c0Save(); renderDiary();
+  });
   $('dExp').addEventListener('click', function(){
     $('ovlTxt').value = diaryCSV();
     $('ovl').className = 'show';
@@ -792,7 +874,6 @@
     var dt = diDateISO || todayISO();
     var dv = parseNum($('diD'));
     var ov = parseNum($('diO'));
-    if (dv===0 && ov===0) return;
     // gleicher Tag: Eintrag ergaenzen statt Duplikat
     var hit=null;
     for (var i=0;i<diary.length;i++){ if (diary[i].date===dt){ hit=diary[i]; break; } }
@@ -801,15 +882,32 @@
     diarySave();
     renderDiary();
   });
+  var pendingTimer = null;
+  function clearPending(){
+    pendingDel = -1;
+    if (pendingTimer){ clearTimeout(pendingTimer); pendingTimer=null; }
+  }
   $('dlist').addEventListener('click', function(ev){
     var t = ev.target;
     if (t && t.getAttribute && t.getAttribute('data-i')!==null){
-      diary.splice(+t.getAttribute('data-i'), 1);
-      diarySave();
-      renderDiary();
+      var i = +t.getAttribute('data-i');
+      if (i === pendingDel){                 // zweiter Tipp: wirklich loeschen
+        clearPending();
+        diary.splice(i, 1);
+        diarySave();
+        renderDiary();
+      } else {                               // erster Tipp: Bestaetigung anbieten
+        clearPending();
+        pendingDel = i;
+        renderDiary();
+        pendingTimer = setTimeout(function(){ clearPending(); renderDiary(); }, 4000);
+      }
+    } else {                                 // Tipp daneben: Bestaetigung zuruecknehmen
+      if (pendingDel !== -1){ clearPending(); renderDiary(); }
     }
   });
   $('tgStop').addEventListener('click', function(){ stopOn = !stopOn; render(); });
+  $('tgVH').addEventListener('click', function(){ vhOn = !vhOn; syncLoad('days'); render(); });
   $('tgLoad').addEventListener('click', function(){ loadOn = !loadOn; syncLoad('days'); render(); });
   $('tgDamp').addEventListener('click', function(){ dampOn = !dampOn; render(); });
 
@@ -818,7 +916,7 @@
   sLD.addEventListener('input', function(){ syncLoad('dose'); render(); });
   sLT.addEventListener('input', function(){ syncLoad('days'); render(); });
   sLZ.addEventListener('input', function(){ syncLoad('days'); render(); });
-  [sW,sC,sH].forEach(function(el){ el.addEventListener('input', function(){ syncLoad('days'); render(); }); });
+  [sW,sC,sH,sV].forEach(function(el){ el.addEventListener('input', function(){ syncLoad('days'); render(); }); });
 
   // Scrub
   var scrubbing = false;
@@ -842,6 +940,12 @@
   document.addEventListener('pointercancel', function(){
     scrubbing = false; scrubT = null; render();
   });
+
+  // iOS-Zoom hart unterbinden: Safari-Gesten + Doppeltipp-Zoom
+  ['gesturestart','gesturechange','gestureend'].forEach(function(t){
+    document.addEventListener(t, function(ev){ ev.preventDefault(); }, {passive:false});
+  });
+  document.addEventListener('dblclick', function(ev){ ev.preventDefault(); }, {passive:false});
 
   render();
 })();
