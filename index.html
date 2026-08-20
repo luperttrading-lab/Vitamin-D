@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.31</title>
+<title>VitD-Kinetik v1.32</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -154,7 +154,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.31</small></h1>
+  <h1>VitD-Kinetik<small>v1.32</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -561,8 +561,9 @@
 
   function renderDiary(){
     diary.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
-    var lv = diaryLevels();
-    drawDiaryChart(lv);
+    var lv = null;
+    try { lv = diaryLevels(); } catch(e){ lv = null; }
+    try { drawDiaryChart(lv); } catch(e){ $('dchartWrap').className=''; }
     var out='';
     for (var i=0;i<diary.length;i++){
       var e=diary[i];
@@ -768,12 +769,27 @@
     $('tabDiary').className   = (mo==='diary')?'on':'';
     $('viewChart').style.display = (mo==='diary') ? 'none' : 'contents';
     $('viewDiary').style.display = (mo==='diary') ? 'flex' : 'none';
-    if (mo==='diary'){ renderDiary(); } else { render(); }
+    if (mo==='diary'){ prefillFromLast(); renderDiary(); } else { render(); }
   }
   $('tabVerlauf').addEventListener('click', function(){ setMode('verlauf'); });
   $('tabDiary').addEventListener('click', function(){ setMode('diary'); });
 
   // Tagebuch-Interaktion
+  // iOS: nach dem Schliessen der Tastatur verschiebt sich das Layout und das
+  // click-Event auf einem Button geht verloren -> auf pointerdown reagieren.
+  function onTap(el, fn){
+    var last = 0;
+    function fire(ev){
+      var now = Date.now();
+      if (now - last < 400) return;
+      last = now;
+      if (ev && ev.preventDefault) ev.preventDefault();
+      fn();
+    }
+    el.addEventListener('pointerdown', fire);
+    el.addEventListener('click', fire);
+  }
+
   function groupDigits(el){
     var raw = String(el.value).replace(/[^0-9]/g,'').slice(0,7);
     el.value = raw ? (+raw).toLocaleString('de-DE') : '';
@@ -843,6 +859,13 @@
     if (dateDrag || c0Drag) ev.preventDefault();
   }, {passive:false});
 
+  function prefillFromLast(){
+    if (!diary.length) return;
+    var newest = diary[0];
+    for (var i=1;i<diary.length;i++) if (diary[i].date > newest.date) newest = diary[i];
+    $('diD').value = newest.d ? newest.d.toLocaleString('de-DE') : '';
+    $('diO').value = newest.o ? newest.o.toLocaleString('de-DE') : '';
+  }
   diaryLoad();
   c0Load();
   if (c0set) c0DateISO = c0set.date;
@@ -859,18 +882,18 @@
     return (isFinite(v) && v>0) ? Math.round(v*10)/10 : 0;
   }
   $('diC0').addEventListener('input', function(){ decFormat($('diC0')); });
-  $('diC0Set').addEventListener('click', function(){
+  onTap($('diC0Set'), function(){
     var v = parseDec($('diC0'));
     if (v>0){ c0set={v:v, date:c0DateISO}; $('diC0').value=''; }
     else if (c0set){ c0set=null; }         // leer + Tipp = Start loeschen
     c0Save(); renderDiary();
   });
-  $('dExp').addEventListener('click', function(){
+  onTap($('dExp'), function(){
     $('ovlTxt').value = diaryCSV();
     $('ovl').className = 'show';
   });
-  $('ovlClose').addEventListener('click', function(){ $('ovl').className = ''; });
-  $('diAdd').addEventListener('click', function(){
+  onTap($('ovlClose'), function(){ $('ovl').className = ''; });
+  onTap($('diAdd'), function(){
     var dt = diDateISO || todayISO();
     var dv = parseNum($('diD'));
     var ov = parseNum($('diO'));
@@ -878,8 +901,9 @@
     var hit=null;
     for (var i=0;i<diary.length;i++){ if (diary[i].date===dt){ hit=diary[i]; break; } }
     if (hit){ hit.d+=dv; hit.o+=ov; } else { diary.push({date:dt, d:dv, o:ov}); }
-    $('diD').value=''; $('diO').value='';
     diarySave();
+    prefillFromLast();
+    if (dt === diDateISO && dt < todayISO()){ diDateISO = isoAddDays(dt,1); showDate(); }
     renderDiary();
   });
   var pendingTimer = null;
