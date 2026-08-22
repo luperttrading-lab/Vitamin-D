@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v1.37</title>
+<title>VitD-Kinetik v2.3</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,7 +35,26 @@
   #plateauHead{font-size:13px;color:var(--amber);font-variant-numeric:tabular-nums;
     min-width:118px;text-align:right;font-weight:600}
 
-  #tabs{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5px;height:30px;margin-bottom:6px}
+  #tabs{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;height:30px;margin-bottom:6px}
+  #viewStart{flex:0 0 auto;display:none;flex-direction:column}
+  #wheelRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
+  #wheelLab{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:var(--dim);padding:0 2px 3px}
+  .wheel{display:flex;align-items:center;justify-content:space-between;height:36px;
+    background:var(--panel);border:1px solid var(--line);border-radius:9px;
+    color:var(--fg);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:0 7px;touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}
+  .wheel *{pointer-events:none}
+  .wheel .arr{display:flex;flex-direction:column;line-height:7px;font-size:8px;color:var(--dim)}
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;
+    padding:8px 10px 9px 12px;margin-bottom:7px;position:relative;overflow:hidden}
+  .qcard .bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+  .qcard .q{font-size:11.5px;color:var(--dim)}
+  .qcard .a{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px}
+  .qcard .s{font-size:11px;color:var(--dim);margin-top:1px}
+  .qcard .ch{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:19px}
+  #meineDaten{background:#10151c;border:1px solid var(--line);border-radius:11px;padding:8px 12px;margin-top:2px}
+  #meineDaten .t{font-size:11px;color:var(--dim)}
+  #meineDaten .v{font-size:13px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
   #viewDiary{flex:0 0 auto;display:none;flex-direction:column}
   .din{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:38px;margin-bottom:6px}
   .din input{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);
@@ -50,6 +69,9 @@
     font-size:18px;font-weight:700;width:42px;font-family:inherit}
   .dhead{display:grid;grid-template-columns:1.1fr 1fr 0.9fr 0.9fr auto;gap:5px;font-size:10px;color:var(--dim);
     padding:0 2px 4px}
+  .dhead span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #dsum{white-space:nowrap}
+  #dsum span{overflow:hidden;text-overflow:ellipsis}
   #dstart{display:grid;grid-template-columns:1fr 1.25fr 1.15fr;gap:6px;height:34px;margin-bottom:6px;align-items:stretch}
   #diC0Date{display:flex;align-items:center;justify-content:space-between;
     background:var(--panel);border:1px solid var(--line);border-radius:8px;
@@ -159,13 +181,37 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v1.37</small></h1>
+  <h1>VitD-Kinetik<small>v2.3</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
 <div id="tabs">
-  <button id="tabVerlauf" class="on" type="button">Verlauf</button>
+  <button id="tabStart" class="on" type="button">Start</button>
+  <button id="tabVerlauf" type="button">Verlauf</button>
   <button id="tabDiary" type="button">Tagebuch</button>
+</div>
+
+<div id="viewStart">
+  <div id="wheelLab"><span>Körpergewicht</span><span>Startwert</span><span>Sonne/Nahrung</span></div>
+  <div id="wheelRow">
+    <div class="wheel" id="whW"><span id="whWTxt">–</span><span class="arr">▲<br>▼</span></div>
+    <div class="wheel" id="whC"><span id="whCTxt">–</span><span class="arr">▲<br>▼</span></div>
+    <div class="wheel" id="whE"><span id="whETxt">–</span><span class="arr">▲<br>▼</span></div>
+  </div>
+  <div class="ctl" style="height:42px">
+    <div class="row"><span class="name">Tagesdosis</span><span class="value" id="vD2">9.000 IE</span></div>
+    <input type="range" id="sD2" min="0" max="20000" step="500" value="9000">
+  </div>
+  <div class="qcard" id="cardA"><div class="bar" style="background:#f0a500"></div>
+    <div class="q">Wo lande ich?</div><div class="a" id="caV" style="color:#f0a500">–</div>
+    <div class="s" id="caS">–</div><div class="ch">›</div></div>
+  <div class="qcard" id="cardB"><div class="bar" style="background:#7ee2a8"></div>
+    <div class="q" id="cbQ">Wie komme ich auf 60?</div><div class="a" id="cbV" style="color:#7ee2a8">–</div>
+    <div class="s" id="cbS">–</div><div class="ch">›</div></div>
+  <div class="qcard" id="cardC"><div class="bar" style="background:#58a6ff"></div>
+    <div class="q">Was, wenn ich aufhöre?</div><div class="a" id="ccV" style="color:#58a6ff">–</div>
+    <div class="s" id="ccS">–</div><div class="ch">›</div></div>
+  <div id="meineDaten"><div class="t">Modell &amp; Feineinstellungen ›</div><div class="v" id="mdV">–</div></div>
 </div>
 
 <div id="scroller">
@@ -236,7 +282,7 @@
 
 <div id="viewDiary">
   <div class="dhead" style="grid-template-columns:1fr 1.25fr 1.15fr;padding-bottom:2px">
-    <span>Messwert [ng/ml]</span><span>Startdatum</span><span>heute berechnet</span>
+    <span>Messwert [ng/ml]</span><span>Startdatum</span><span style="text-align:right">heute</span>
   </div>
   <div id="dstart">
     <input type="text" id="diC0" inputmode="decimal" placeholder="z. B. 26,5" autocomplete="off">
@@ -291,7 +337,7 @@
   // die laenger ist als die reine Tracer-HWZ von 25(OH)D (15-25 d).
 
   var $ = function(id){ return document.getElementById(id); };
-  var sW=$('sW'), sD=$('sD'), sE=$('sE'), sC=$('sC'), sH=$('sH'), sV=$('sV'), sLD=$('sLD'), sLT=$('sLT'), sLZ=$('sLZ'), sST=$('sST');
+  var sW=$('sW'), sD=$('sD'), sD2=$('sD2'), sE=$('sE'), sC=$('sC'), sH=$('sH'), sV=$('sV'), sLD=$('sLD'), sLT=$('sLT'), sLZ=$('sLZ'), sST=$('sST');
   var svg=$('chart');
 
   // Modell -------------------------------------------------------------
@@ -575,10 +621,8 @@
       var e=diary[i];
       var cell='\u2013';
       if (lv && lv.levels[e.date]!==undefined) cell=fmt1(lv.levels[e.date]);
-      var nSame=0;
-      for (var z=0;z<diary.length;z++) if (diary[z].date===e.date) nSame++;
       var btn = (i===pendingDel)
-        ? '<button type="button" class="confirm" data-i="'+i+'">'+(nSame>1?'Tag ('+nSame+')?':'l\u00f6schen?')+'</button>'
+        ? '<button type="button" class="confirm" data-i="'+i+'">l\u00f6schen?</button>'
         : '<button type="button" data-i="'+i+'">\u2715</button>';
       out+='<div class="drow"><span>'+fmtDate(e.date)+'</span><span>'+(e.d?fmtInt(e.d)+' IE':'\u2013')+
            '</span><span>'+(e.o?fmtInt(e.o):'\u2013')+'</span><span>'+cell+'</span>'+btn+'</div>';
@@ -649,7 +693,6 @@
   var loadWarn = '';
   function syncLoad(master){
     loadWarn = '';
-    if (!loadOn) return;
     var w=+sW.value, hwz=+sH.value, C0=+sC.value, Z=+sLZ.value;
     var k=LN2/hwz;
     if (C0 >= Z){ loadWarn='Start \u2265 Ziel \u2013 keine Aufdosierung n\u00f6tig'; return; }
@@ -707,7 +750,7 @@
     var mHi = model(w,dose,extra,c0,Math.round(hwz*4/3),dampOn,V,load,vhOn);
     var showRef = dampOn || vhOn;
 
-    if (mode!=='diary') drawVerlauf(m,mLo,mHi,mRef,c0,showRef);
+    if (mode==='verlauf') drawVerlauf(m,mLo,mHi,mRef,c0,showRef);
 
     $('vW').textContent = w+' kg';
     $('vD').textContent = fmtInt(dose)+' IE';
@@ -727,6 +770,35 @@
     $('ctlST').className = 'ctl c-load' + (stopOn?'':' off');
     $('tgLoad').className = loadOn ? 'on' : '';
     $('tgStop').className = stopOn ? 'on' : '';
+
+    // Start-Tab: Fragenkarten
+    sD2.value = sD.value;
+    $('vD2').textContent = fmtInt(dose)+' IE';
+    $('caV').textContent = fmt1(m.plateau)+' ng/ml';
+    $('caS').textContent = 'bei '+fmtInt(dose)+' IE t\u00e4glich'+(extra>0?' + '+fmtInt(extra)+' sonstige':'');
+    var Zt=+sLZ.value;
+    $('cbQ').textContent = 'Wie komme ich auf '+Zt+'?';
+    if (c0 >= Zt){
+      $('cbV').textContent = 'schon erreicht';
+      $('cbS').textContent = 'Startwert liegt bei '+c0+' ng/ml';
+    } else {
+      $('cbV').textContent = fmtInt(lDose)+' IE \u00d7 '+lDays+' d';
+      var hf = vhOn ? fVH(Zt) : V*LN2/hwz;
+      $('cbS').textContent = 'danach '+fmtInt(Math.round(hf*w*Zt/100)*100)+' IE/d halten';
+    }
+    var P = m.plateau;
+    if (P <= 30){
+      $('ccV').textContent = 'bereits unter 30';
+      $('ccS').textContent = 'Plateau liegt bei '+fmt1(P)+' ng/ml';
+    } else {
+      var tHalt=0, Cs=P, kk;
+      while (Cs > 30 && tHalt < 3650){ kk = vhOn ? fVH(Cs)/V : LN2/hwz; Cs -= kk*Cs; tHalt++; }
+      var kP = vhOn ? fVH(P)/V : LN2/hwz;
+      $('ccV').textContent = 'unter 30 nach '+fmtInt(tHalt)+' d';
+      $('ccS').textContent = 'aktuell \u2212'+fmt2(kP*P)+' ng/ml pro Tag';
+    }
+    for (var wi=0; wi<wheels.length; wi++) wheels[wi].show();
+    $('mdV').textContent = 'V '+Math.round(V)+' \u00b7 HWZ '+hwz+' d \u00b7 '+(vhOn?'v.Helden':'linear')+(dampOn?' + Puffer':'');
 
     $('plateauHead').textContent = 'Plateau '+fmt1(m.plateau)+' ng/ml';
     $('roPlateau').textContent = fmt1(m.plateau);
@@ -810,13 +882,49 @@
   // Tabs + Toggles ------------------------------------------------------
   function setMode(mo){
     mode = mo; scrubT = null;
+    $('tabStart').className   = (mo==='start')?'on':'';
     $('tabVerlauf').className = (mo==='verlauf')?'on':'';
     $('tabDiary').className   = (mo==='diary')?'on':'';
-    $('viewChart').style.display = (mo==='diary') ? 'none' : 'contents';
+    $('viewStart').style.display = (mo==='start') ? 'flex' : 'none';
+    $('viewChart').style.display = (mo==='verlauf') ? 'contents' : 'none';
     $('viewDiary').style.display = (mo==='diary') ? 'flex' : 'none';
     if (mo==='diary'){ prefillFromLast(); renderDiary(); } else { render(); }
   }
+  // Drehregler: vertikal ziehen aendert den Wert des gekoppelten Sliders.
+  var wheels=[], activeWheel=null, wY0=0, wV0=0;
+  function makeWheel(id, txtId, slider, step, unit){
+    var w = { el:$(id), txt:$(txtId), slider:slider, step:step, unit:unit };
+    w.show = function(){ w.txt.textContent = fmtInt(+slider.value)+w.unit; };
+    w.el.addEventListener('touchstart', function(){ activeWheel=w; }, {passive:true});
+    w.el.addEventListener('pointerdown', function(ev){
+      activeWheel=w; wY0=ev.clientY; wV0=+slider.value; ev.preventDefault();
+    });
+    wheels.push(w); w.show();
+    return w;
+  }
+  makeWheel('whW','whWTxt', sW, 1, ' kg');
+  makeWheel('whC','whCTxt', sC, 1, ' ng/ml');
+  makeWheel('whE','whETxt', sE, 250, ' IE');
+  document.addEventListener('pointermove', function(ev){
+    if (!activeWheel) return;
+    var sl = activeWheel.slider;
+    var steps = Math.round((wY0 - ev.clientY)/18);
+    var v = wV0 + steps*activeWheel.step;
+    v = Math.max(+sl.min, Math.min(+sl.max, v));
+    if (v !== +sl.value){ sl.value = String(v); syncLoad('days'); render(); }
+  });
+  document.addEventListener('pointerup', function(){ activeWheel=null; });
+  document.addEventListener('pointercancel', function(){ activeWheel=null; });
+  document.addEventListener('touchend', function(){ activeWheel=null; }, {passive:true});
+  document.addEventListener('touchmove', function(ev){ if (activeWheel) ev.preventDefault(); }, {passive:false});
+
+  $('tabStart').addEventListener('click', function(){ setMode('start'); });
   $('tabVerlauf').addEventListener('click', function(){ setMode('verlauf'); });
+  onTap($('cardA'), function(){ setMode('verlauf'); });
+  onTap($('cardB'), function(){ if(!loadOn){ loadOn=true; syncLoad('days'); } setMode('verlauf'); });
+  onTap($('cardC'), function(){ if(!stopOn){ stopOn=true; } setMode('verlauf'); });
+  onTap($('meineDaten'), function(){ setMode('verlauf'); });
+  sD2.addEventListener('input', function(){ sD.value = sD2.value; syncLoad('days'); render(); });
   $('tabDiary').addEventListener('click', function(){ setMode('diary'); });
 
   // Tagebuch-Interaktion
@@ -964,12 +1072,9 @@
     var t = ev.target;
     if (t && t.getAttribute && t.getAttribute('data-i')!==null){
       var i = +t.getAttribute('data-i');
-      if (i === pendingDel){                 // zweiter Tipp: ganzen Tag loeschen
+      if (i === pendingDel){                 // zweiter Tipp: diesen einen Eintrag loeschen
         clearPending();
-        var day = diary[i] && diary[i].date;
-        if (day){
-          for (var j=diary.length-1;j>=0;j--) if (diary[j].date===day) diary.splice(j,1);
-        }
+        diary.splice(i, 1);
         diarySave();
         renderDiary();
       } else {                               // erster Tipp: Bestaetigung anbieten
@@ -1023,7 +1128,8 @@
   });
   document.addEventListener('dblclick', function(ev){ ev.preventDefault(); }, {passive:false});
 
-  render();
+  syncLoad('days');
+  setMode('start');
 })();
 
 // Service Worker registrieren: sorgt dafuer, dass die Home-Bildschirm-App
