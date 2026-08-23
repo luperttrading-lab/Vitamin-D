@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v2.4</title>
+<title>VitD-Kinetik v2.5</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,7 +18,11 @@
     --amber:#f0a500; --blue:#58a6ff;
     --red:#f08080; --green:#7ee2a8;
   }
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea{-webkit-user-select:text;user-select:text}
+  svg,svg *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;pointer-events:none}
+  svg#chart{pointer-events:auto}
   html,body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
   body{
     background:var(--bg);color:var(--fg);
@@ -186,7 +190,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v2.4</small></h1>
+  <h1>VitD-Kinetik<small>v2.5</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
