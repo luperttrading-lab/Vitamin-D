@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v2.5</title>
+<title>VitD-Kinetik v2.6</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -190,7 +190,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v2.5</small></h1>
+  <h1>VitD-Kinetik<small>v2.6</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -493,7 +493,10 @@
       s+='<circle cx="'+sx(tS)+'" cy="'+sy(cS)+'" r="4.2" fill="#e6edf3" stroke="#0d1117" stroke-width="1.4"/>';
       var anchor = tS < TDAYS*0.55 ? 'start' : 'end';
       var xTxt = tS < TDAYS*0.55 ? sx(tS)+7 : sx(tS)-7;
+      var phase = (m.loadDays>0 && tS < m.loadDays) ? 'Aufdosierung'
+                : ((m.stopDay>0 && tS >= m.stopDay) ? 'nach Stopp' : 'Erhaltung');
       s+='<text x="'+xTxt+'" y="'+(MT+12)+'" text-anchor="'+anchor+'" fill="#e6edf3" font-size="11" font-weight="600">Tag '+Math.round(tS)+' &#183; '+fmt1(cS)+' ng/ml</text>';
+      s+='<text x="'+xTxt+'" y="'+(MT+51)+'" text-anchor="'+anchor+'" fill="#f0a500" font-size="10" font-weight="600">'+phase+'</text>';
       s+='<text x="'+xTxt+'" y="'+(MT+25)+'" text-anchor="'+anchor+'" fill="#8b949e" font-size="10">'+(rS>=0?'+':'&#8722;')+fmt2(Math.abs(rS))+' ng/ml pro Tag</text>';
       if (showRef){
         var dLin = cS - mRef.C(tS);
@@ -1112,26 +1115,39 @@
 
   // Scrub
   var scrubbing = false;
-  function evtToDay(ev){
+  function xToDay(clientX){
     var r = svg.getBoundingClientRect();
-    var xv = (ev.clientX - r.left)/r.width*VW;
+    var xv = (clientX - r.left)/r.width*VW;
     return Math.max(0, Math.min(TDAYS, (xv - ML)/(VW-ML-MR)*TDAYS));
   }
-  svg.addEventListener('pointerdown', function(ev){
+  var touchScrub = false;   // laeuft die Geste ueber Touch-Events?
+  function scrubStart(x){ scrubbing = true; scrubT = xToDay(x); render(); }
+  function scrubMove(x){ if (!scrubbing) return; scrubT = xToDay(x); render(); }
+  function scrubEnd(){ if (!scrubbing) return; scrubbing = false; scrubT = null; render(); }
+
+  // Touch-Ebene: haelt die Geste fest, auch wenn iOS pointercancel schickt
+  svg.addEventListener('touchstart', function(ev){
     if (mode!=='verlauf') return;
-    scrubbing = true; scrubT = evtToDay(ev); render(); ev.preventDefault();
+    touchScrub = true; scrubStart(ev.touches[0].clientX); ev.preventDefault();
+  }, {passive:false});
+  svg.addEventListener('touchmove', function(ev){
+    if (!touchScrub) return;
+    scrubMove(ev.touches[0].clientX); ev.preventDefault();
+  }, {passive:false});
+  svg.addEventListener('touchend', function(){ touchScrub = false; scrubEnd(); });
+  svg.addEventListener('touchcancel', function(){ touchScrub = false; scrubEnd(); });
+
+  // Zeiger-Ebene fuer Maus/Trackpad
+  svg.addEventListener('pointerdown', function(ev){
+    if (mode!=='verlauf' || touchScrub || ev.pointerType==='touch') return;
+    scrubStart(ev.clientX); ev.preventDefault();
   });
   document.addEventListener('pointermove', function(ev){
-    if (!scrubbing) return;
-    scrubT = evtToDay(ev); render();
+    if (!scrubbing || touchScrub) return;
+    scrubMove(ev.clientX);
   });
-  document.addEventListener('pointerup', function(){
-    if (!scrubbing) return;
-    scrubbing = false; scrubT = null; render();
-  });
-  document.addEventListener('pointercancel', function(){
-    scrubbing = false; scrubT = null; render();
-  });
+  document.addEventListener('pointerup', function(){ if (!touchScrub) scrubEnd(); });
+  document.addEventListener('pointercancel', function(){ if (!touchScrub) scrubEnd(); });
 
   // iOS-Zoom hart unterbinden: Safari-Gesten + Doppeltipp-Zoom
   ['gesturestart','gesturechange','gestureend'].forEach(function(t){
