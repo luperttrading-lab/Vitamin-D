@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v2.6</title>
+<title>VitD-Kinetik v2.7</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -163,6 +163,10 @@
   .ctl.off input[type=range]{pointer-events:none}
   .ctl .row{display:flex;justify-content:space-between;align-items:baseline;height:16px}
   .ctl .name{font-size:12px;color:var(--dim)}
+  #btnToday{background:#1c2128;border:1px solid #58a6ff;border-radius:6px;color:#58a6ff;
+    font-size:10.5px;font-family:inherit;padding:1px 6px;margin-left:5px;display:none;
+    font-variant-numeric:tabular-nums}
+  #btnToday.on{display:inline-block}
   .ctl .value{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
       min-width:124px;text-align:right}
   input[type=range]{
@@ -190,7 +194,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v2.6</small></h1>
+  <h1>VitD-Kinetik<small>v2.7</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -267,15 +271,15 @@
   </div>
   <div class="ctl c-load off" id="ctlST">
     <div class="row"><span class="name">Einnahmestopp ab Tag</span><span class="value" id="vST">60</span></div>
-    <input type="range" id="sST" min="5" max="115" step="1" value="60">
+    <input type="range" id="sST" min="0" max="115" step="1" value="60">
   </div>
   <div class="ctl c-extra">
     <div class="row"><span class="name">Sonstige Zufuhr (Sonne/Nahrung)</span><span class="value" id="vE">0 IE</span></div>
     <input type="range" id="sE" min="0" max="4000" step="250" value="0">
   </div>
   <div class="ctl c-c0">
-    <div class="row"><span class="name">Startwert (Restbestand)</span><span class="value" id="vC">26 ng/ml</span></div>
-    <input type="range" id="sC" min="0" max="60" step="1" value="26">
+    <div class="row"><span class="name">Startwert <button id="btnToday" type="button">–</button></span><span class="value" id="vC">26 ng/ml</span></div>
+    <input type="range" id="sC" min="0" max="100" step="1" value="26">
   </div>
   <div class="ctl c-hwz">
     <div class="row"><span class="name">System-HWZ (Tempo)</span><span class="value" id="vH">60 Tage</span></div>
@@ -358,7 +362,7 @@
     var gross = (dose+extra)/(V*w);                    // Erhaltungsphase
     var grossL = load ? (load.dose+extra)/(V*w) : gross;  // Aufdosierphase
     var tL = load ? load.days : 0;
-    var tS = (load && load.stop) ? load.stop : Infinity;   // Einnahmestopp
+    var tS = (load && load.stop >= 0) ? load.stop : Infinity;   // Einnahmestopp (0 ist gueltig)
     var grossS = extra/(V*w);                              // nach Stopp nur Sonne/Nahrung
 
     function kOf(c){
@@ -403,7 +407,7 @@
     var peak=0, peakT=0;
     for (var q=0;q<=N;q++){ if (traj[q]>peak){ peak=traj[q]; peakT=q*dt; } }
     return { k0:k0, gross:gross, kOf:kOf, rate:rate, C:C, plateau:plateau(),
-             nonlin:damp, peak:peak, peakT:peakT, loadDays:tL, stopDay:(tS===Infinity?0:tS) };
+             nonlin:damp, peak:peak, peakT:peakT, loadDays:tL, stopDay:(tS===Infinity?-1:tS) };
   }
 
   // Kreuzungszeit mit Zielwert (numerisch, da nichtlinear moeglich)
@@ -452,7 +456,7 @@
       s+='<rect x="'+ML+'" y="'+MT+'" width="'+(xL-ML)+'" height="'+(VH-MT-MB)+'" fill="#f0a500" opacity="0.10"/>';
       s+='<line x1="'+xL+'" y1="'+MT+'" x2="'+xL+'" y2="'+(VH-MB)+'" stroke="#f0a500" stroke-width="0.9" stroke-dasharray="2 2" opacity="0.85"/>';
     }
-    if (m.stopDay > 0 && m.stopDay < TDAYS){
+    if (m.stopDay >= 0 && m.stopDay < TDAYS){
       var xS = sx(m.stopDay);
       s+='<rect x="'+xS+'" y="'+MT+'" width="'+(VW-MR-xS)+'" height="'+(VH-MT-MB)+'" fill="#f08080" opacity="0.07"/>';
       s+='<line x1="'+xS+'" y1="'+MT+'" x2="'+xS+'" y2="'+(VH-MB)+'" stroke="#f08080" stroke-width="0.9" stroke-dasharray="2 2" opacity="0.85"/>';
@@ -494,7 +498,7 @@
       var anchor = tS < TDAYS*0.55 ? 'start' : 'end';
       var xTxt = tS < TDAYS*0.55 ? sx(tS)+7 : sx(tS)-7;
       var phase = (m.loadDays>0 && tS < m.loadDays) ? 'Aufdosierung'
-                : ((m.stopDay>0 && tS >= m.stopDay) ? 'nach Stopp' : 'Erhaltung');
+                : ((m.stopDay>=0 && tS >= m.stopDay) ? 'nach Stopp' : 'Erhaltung');
       s+='<text x="'+xTxt+'" y="'+(MT+12)+'" text-anchor="'+anchor+'" fill="#e6edf3" font-size="11" font-weight="600">Tag '+Math.round(tS)+' &#183; '+fmt1(cS)+' ng/ml</text>';
       s+='<text x="'+xTxt+'" y="'+(MT+51)+'" text-anchor="'+anchor+'" fill="#f0a500" font-size="10" font-weight="600">'+phase+'</text>';
       s+='<text x="'+xTxt+'" y="'+(MT+25)+'" text-anchor="'+anchor+'" fill="#8b949e" font-size="10">'+(rS>=0?'+':'&#8722;')+fmt2(Math.abs(rS))+' ng/ml pro Tag</text>';
@@ -754,7 +758,7 @@
     var lDose=+sLD.value, lDays=+sLT.value, tStop=+sST.value;
     var noLoad = loadOn && (+sC.value >= +sLZ.value);   // Start >= Ziel: nichts aufzudosieren
     var load = (loadOn || stopOn) ? {dose:(loadOn&&!noLoad?lDose:dose), days:(loadOn&&!noLoad?lDays:0),
-                                     stop:(stopOn?tStop:0)} : null;
+                                     stop:(stopOn?tStop:-1)} : null;
     var V = +sV.value;
     var m   = model(w,dose,extra,c0,hwz,dampOn,V,load,vhOn);
     // Vergleichskurve: gleiche Dosis, aber reine Tracer-HWZ von 25(OH)D
@@ -812,6 +816,7 @@
       $('ccS').textContent = 'aktuell \u2212'+fmt2(kP*P)+' ng/ml pro Tag';
     }
     for (var wi=0; wi<wheels.length; wi++) wheels[wi].show();
+    refreshTodayBtn();
     $('mdV').textContent = 'V '+Math.round(V)+' \u00b7 HWZ '+hwz+' d \u00b7 '+(vhOn?'v.Helden':'linear')+(dampOn?' + Puffer':'');
 
     $('plateauHead').textContent = 'Plateau '+fmt1(m.plateau)+' ng/ml';
@@ -931,6 +936,23 @@
   document.addEventListener('pointercancel', function(){ activeWheel=null; });
   document.addEventListener('touchend', function(){ activeWheel=null; }, {passive:true});
   document.addEventListener('touchmove', function(ev){ if (activeWheel) ev.preventDefault(); }, {passive:false});
+
+  // Startwert aus dem Tagebuch uebernehmen
+  function todayLevel(){
+    try { var lv = diaryLevels(); return (lv && lv.today!==null && lv.today!==undefined) ? lv.today : null; }
+    catch(e){ return null; }
+  }
+  function refreshTodayBtn(){
+    var t = todayLevel(), b = $('btnToday');
+    if (t===null){ b.className=''; b.textContent='\u2013'; }
+    else { b.className='on'; b.textContent='\u2190 heute '+fmt1(t); }
+  }
+  onTap($('btnToday'), function(){
+    var t = todayLevel();
+    if (t===null) return;
+    var v = Math.max(+sC.min, Math.min(+sC.max, Math.round(t)));
+    sC.value = String(v); syncLoad('days'); render();
+  });
 
   $('tabStart').addEventListener('click', function(){ setMode('start'); });
   $('tabVerlauf').addEventListener('click', function(){ setMode('verlauf'); });
