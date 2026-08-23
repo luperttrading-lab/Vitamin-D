@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v2.7</title>
+<title>VitD-Kinetik v2.8</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -159,8 +159,7 @@
 
   #controls{flex:0 0 auto;display:flex;flex-direction:column;gap:2px}
   .ctl{height:40px;display:flex;flex-direction:column;justify-content:center}
-  .ctl.off{opacity:.35}
-  .ctl.off input[type=range]{pointer-events:none}
+  .ctl.off{opacity:.45}
   .ctl .row{display:flex;justify-content:space-between;align-items:baseline;height:16px}
   .ctl .name{font-size:12px;color:var(--dim)}
   #btnToday{background:#1c2128;border:1px solid #58a6ff;border-radius:6px;color:#58a6ff;
@@ -194,7 +193,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v2.7</small></h1>
+  <h1>VitD-Kinetik<small>v2.8</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -717,7 +716,7 @@
 
     var V = +sV.value, extra=+sE.value, damp=dampOn, vh=vhOn;
     function endLevel(D,T){
-      return model(w, +sD.value, extra, C0, hwz, damp, V, {dose:D, days:T, stop:0}, vh).C(T);
+      return model(w, +sD.value, extra, C0, hwz, damp, V, {dose:D, days:T, stop:-1}, vh).C(T);
     }
     function doseFor(T){                    // Bisektion: endLevel monoton in D
       var lo=0, hi=200000;
@@ -1129,10 +1128,11 @@
   $('tgDamp').addEventListener('click', function(){ dampOn = !dampOn; render(); });
 
   // Slider
-  [sD,sE,sST].forEach(function(el){ el.addEventListener('input', render); });
-  sLD.addEventListener('input', function(){ syncLoad('dose'); render(); });
-  sLT.addEventListener('input', function(){ syncLoad('days'); render(); });
-  sLZ.addEventListener('input', function(){ syncLoad('days'); render(); });
+  [sD,sE].forEach(function(el){ el.addEventListener('input', render); });
+  sLD.addEventListener('input', function(){ loadOn = true; syncLoad('dose'); render(); });
+  sLT.addEventListener('input', function(){ loadOn = true; syncLoad('days'); render(); });
+  sLZ.addEventListener('input', function(){ loadOn = true; syncLoad('days'); render(); });
+  sST.addEventListener('input', function(){ stopOn = true; render(); });
   [sW,sC,sH,sV].forEach(function(el){ el.addEventListener('input', function(){ syncLoad('days'); render(); }); });
 
   // Scrub
