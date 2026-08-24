@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitD-Kinetik v2.8</title>
+<title>VitD-Kinetik v3.1</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,6 +41,7 @@
 
   #tabs{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;height:30px;margin-bottom:6px}
   #viewStart{flex:0 0 auto;display:none;flex-direction:column}
+  #controls{flex:0 0 auto}
   #wheelRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
   #wheelLab{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:var(--dim);padding:0 2px 3px}
   .wheel{display:flex;align-items:center;justify-content:space-between;height:36px;
@@ -59,7 +60,7 @@
   #meineDaten{background:#10151c;border:1px solid var(--line);border-radius:11px;padding:8px 12px;margin-top:2px}
   #meineDaten .t{font-size:11px;color:var(--dim)}
   #meineDaten .v{font-size:13px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
-  #viewDiary{flex:0 0 auto;display:none;flex-direction:column}
+  #viewDiary{flex:1 1 auto;min-height:0;display:none;flex-direction:column}
   .din{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:38px;margin-bottom:6px}
   .din input{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);
     font-family:inherit;font-size:16px;padding:0 8px;min-width:0;-webkit-appearance:none}
@@ -90,7 +91,7 @@
     font-size:11px;font-family:inherit;padding:0 4px}
   #dstart button.set{border-color:#7ee2a8;color:#7ee2a8}
   .dhead span:last-child{width:42px}
-  #dlist{flex:0 0 auto}
+  #dlist{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
   #dinfo{flex:0 0 auto;position:sticky;top:0;z-index:6;background:var(--bg);
     border-bottom:1px solid var(--line);height:24px;line-height:24px;margin-bottom:6px;
     display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;
@@ -113,6 +114,15 @@
     background:#1c2128;border:1px solid var(--amber);border-radius:11px;color:var(--amber);
     font-size:13px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.5)}
   #upd.show{display:flex}
+  #mdl{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:55;
+    align-items:center;justify-content:center;padding:18px}
+  #mdl.show{display:flex}
+  #mdlBox{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    width:100%;max-width:420px;padding:14px;display:flex;flex-direction:column;gap:4px}
+  #mdlBox h2{font-size:14px;color:var(--fg);margin-bottom:4px}
+  #mdlNote{font-size:10.5px;color:var(--dim);margin:6px 0 10px}
+  #mdlClose{background:#1c2128;border:1px solid var(--amber);border-radius:8px;color:var(--amber);
+    font-size:13px;font-weight:600;font-family:inherit;height:38px}
   #ovl{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:50;
     align-items:center;justify-content:center;padding:20px}
   #ovl.show{display:flex}
@@ -141,9 +151,8 @@
   #tgLoad.on{color:#f0a500;border-color:#f0a500}
   footer.warn{color:#f08080;font-weight:600}
 
-  #scroller{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;touch-action:pan-y;display:flex;flex-direction:column}
-  #chartWrap{flex:0 0 auto;height:225px;position:relative}
+  #scroller{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+  #chartWrap{flex:1 1 auto;min-height:110px;position:relative}
   svg{position:absolute;inset:0;width:100%;height:100%;display:block}
   .axis{stroke:var(--line);stroke-width:1}
   .gridline{stroke:var(--line);stroke-width:.5;opacity:.6}
@@ -159,7 +168,7 @@
 
   #controls{flex:0 0 auto;display:flex;flex-direction:column;gap:2px}
   .ctl{height:40px;display:flex;flex-direction:column;justify-content:center}
-  .ctl.off{opacity:.45}
+  .ctl.off{display:none}
   .ctl .row{display:flex;justify-content:space-between;align-items:baseline;height:16px}
   .ctl .name{font-size:12px;color:var(--dim)}
   #btnToday{background:#1c2128;border:1px solid #58a6ff;border-radius:6px;color:#58a6ff;
@@ -167,7 +176,7 @@
     font-variant-numeric:tabular-nums}
   #btnToday.on{display:inline-block}
   .ctl .value{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
-      min-width:124px;text-align:right}
+      min-width:150px;text-align:right}
   input[type=range]{
     -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;
     touch-action:pan-x;
@@ -193,7 +202,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitD-Kinetik<small>v2.8</small></h1>
+  <h1>VitD-Kinetik<small>v3.1</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -201,6 +210,13 @@
   <button id="tabStart" class="on" type="button">Start</button>
   <button id="tabVerlauf" type="button">Verlauf</button>
   <button id="tabDiary" type="button">Tagebuch</button>
+</div>
+
+<div id="toggles">
+  <button id="tgVH" type="button">v.Helden</button>
+  <button id="tgDamp" type="button">Puffer</button>
+  <button id="tgLoad" type="button">Aufdos.</button>
+  <button id="tgStop" type="button">Stopp</button>
 </div>
 
 <div id="viewStart">
@@ -228,12 +244,7 @@
 
 <div id="scroller">
 <div id="viewChart" style="display:contents">
-<div id="toggles">
-  <button id="tgVH" type="button">v.Helden</button>
-  <button id="tgDamp" type="button">Puffer</button>
-  <button id="tgLoad" type="button">Aufdos.</button>
-  <button id="tgStop" type="button">Stopp</button>
-</div>
+
 
 <footer id="formel">C(t) = C₀·e^(−kt) + ΔC∞·(1−e^(−kt))</footer>
 
@@ -280,14 +291,6 @@
     <div class="row"><span class="name">Startwert <button id="btnToday" type="button">–</button></span><span class="value" id="vC">26 ng/ml</span></div>
     <input type="range" id="sC" min="0" max="100" step="1" value="26">
   </div>
-  <div class="ctl c-hwz">
-    <div class="row"><span class="name">System-HWZ (Tempo)</span><span class="value" id="vH">60 Tage</span></div>
-    <input type="range" id="sH" min="20" max="90" step="1" value="60">
-  </div>
-  <div class="ctl c-hwz">
-    <div class="row"><span class="name">Verteilungsfaktor V</span><span class="value" id="vV">143 · V·k 1,65</span></div>
-    <input type="range" id="sV" min="40" max="220" step="1" value="143">
-  </div>
 </div>
 
 </div>
@@ -319,6 +322,22 @@
 </div>
 
 <div id="upd">↻  Neue Version verfügbar – tippen zum Laden</div>
+
+<div id="mdl">
+  <div id="mdlBox">
+    <h2>Modellparameter</h2>
+  <div class="ctl c-hwz">
+    <div class="row"><span class="name">System-HWZ · Verlust/Tag</span><span class="value" id="vH">60 d · 1,16 %/d</span></div>
+    <input type="range" id="sH" min="20" max="90" step="1" value="60">
+  </div>
+  <div class="ctl c-hwz">
+    <div class="row"><span class="name">Verteilungsfaktor V</span><span class="value" id="vV">143 · V·k 1,65</span></div>
+    <input type="range" id="sV" min="40" max="220" step="1" value="143">
+  </div>
+    <div id="mdlNote">Studienband V·k 1,1–1,9 · v.Helden: V 143, 1,00 %/d</div>
+    <button id="mdlClose" type="button">Schließen</button>
+  </div>
+</div>
 
 <div id="ovl">
   <div id="ovlBox">
@@ -773,9 +792,10 @@
     $('vD').textContent = fmtInt(dose)+' IE';
     $('vE').textContent = fmtInt(extra)+' IE';
     $('vC').textContent = c0+' ng/ml';
-    $('vH').textContent = hwz+' Tage';
+    $('vH').textContent = hwz+' d \u00b7 '+fmt2(100*LN2/hwz)+' %/d';
     var prod = V*LN2/hwz;
     $('vV').textContent = Math.round(V)+' \u00b7 V\u00b7k '+prod.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+
+      ' \u00b7 '+fmtInt(Math.round(prod*(+sLZ.value)))+' IE/kg'+
       ((prod<VK_LO||prod>VK_HI)?' \u26a0':'');
     $('vLD').textContent = fmtInt(lDose)+' IE';
     $('vLT').textContent = lDays+' Tage';
@@ -903,6 +923,7 @@
     $('tabStart').className   = (mo==='start')?'on':'';
     $('tabVerlauf').className = (mo==='verlauf')?'on':'';
     $('tabDiary').className   = (mo==='diary')?'on':'';
+    $('toggles').style.display = (mo==='verlauf') ? 'grid' : 'none';
     $('viewStart').style.display = (mo==='start') ? 'flex' : 'none';
     $('viewChart').style.display = (mo==='verlauf') ? 'contents' : 'none';
     $('viewDiary').style.display = (mo==='diary') ? 'flex' : 'none';
@@ -958,7 +979,9 @@
   onTap($('cardA'), function(){ setMode('verlauf'); });
   onTap($('cardB'), function(){ if(!loadOn){ loadOn=true; syncLoad('days'); } setMode('verlauf'); });
   onTap($('cardC'), function(){ if(!stopOn){ stopOn=true; } setMode('verlauf'); });
-  onTap($('meineDaten'), function(){ setMode('verlauf'); });
+  onTap($('meineDaten'), function(){ $('mdl').className = 'show'; });
+  onTap($('formel'), function(){ $('mdl').className = 'show'; });
+  onTap($('mdlClose'), function(){ $('mdl').className = ''; });
   sD2.addEventListener('input', function(){ sD.value = sD2.value; syncLoad('days'); render(); });
   $('tabDiary').addEventListener('click', function(){ setMode('diary'); });
 
