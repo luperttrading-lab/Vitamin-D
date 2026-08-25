@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitaminD Kinetik v3.5</title>
+<title>VitaminD Kinetik v3.7</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -201,7 +201,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitaminD Kinetik<small>v3.5</small></h1>
+  <h1>VitaminD Kinetik<small>v3.7</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -912,7 +912,8 @@
     $('viewStart').style.display = (mo==='start') ? 'flex' : 'none';
     $('viewChart').style.display = (mo==='verlauf') ? 'contents' : 'none';
     $('viewDiary').style.display = (mo==='diary') ? 'flex' : 'none';
-    if (mo==='diary'){ prefillFromLast(); renderDiary(); } else { render(); }
+    if (mo==='diary'){ prefillFromLast(); renderDiary(); }
+    else { if (syncStartFromDiary()) syncLoad('days'); render(); }
   }
   // Drehregler: vertikal ziehen aendert den Wert des gekoppelten Sliders.
   var wheels=[], activeWheel=null, wY0=0, wV0=0;
@@ -928,7 +929,7 @@
   }
   makeWheel('whW','whWTxt', sW, 1, ' kg');
   makeWheel('whC','whCTxt', sC, 1, ' ng/ml');
-  makeWheel('whE','whETxt', sE, 200, ' IE');
+  makeWheel('whE','whETxt', sE, 100, ' IE');
   document.addEventListener('pointermove', function(ev){
     if (!activeWheel) return;
     var sl = activeWheel.slider;
@@ -951,6 +952,14 @@
     var t = todayLevel(), b = $('btnToday');
     if (t===null){ b.className=''; b.textContent='\u2013'; }
     else { b.className='on'; b.textContent='\u2190 heute '+fmt1(t); }
+  }
+  // Startwert folgt automatisch dem aktuell berechneten Tagebuchwert
+  function syncStartFromDiary(){
+    var t = todayLevel();
+    if (t === null) return false;
+    var v = Math.max(+sC.min, Math.min(+sC.max, Math.round(t)));
+    if (String(v) !== sC.value){ sC.value = String(v); return true; }
+    return false;
   }
   onTap($('btnToday'), function(){
     var t = todayLevel();
@@ -1087,7 +1096,7 @@
     var v = parseDec($('diC0'));
     if (v>0){ c0set={v:v, date:c0DateISO}; $('diC0').value=''; }
     else if (c0set){ c0set=null; }         // leer + Tipp = Start loeschen
-    c0Save(); renderDiary();
+    c0Save(); syncStartFromDiary(); syncLoad('days'); renderDiary();
   });
   onTap($('dExp'), function(){
     $('ovlTxt').value = diaryCSV();
@@ -1102,6 +1111,7 @@
     // summiert sie tageweise auf.
     diary.push({date:dt, d:dv, o:ov});
     diarySave();
+    syncStartFromDiary(); syncLoad('days');
     prefillFromLast();
     if (dt === diDateISO && dt < todayISO()){ diDateISO = isoAddDays(dt,1); showDate(); }
     renderDiary();
@@ -1119,6 +1129,7 @@
         clearPending();
         diary.splice(i, 1);
         diarySave();
+        syncStartFromDiary(); syncLoad('days');
         renderDiary();
       } else {                               // erster Tipp: Bestaetigung anbieten
         clearPending();
@@ -1183,6 +1194,7 @@
   });
   document.addEventListener('dblclick', function(ev){ ev.preventDefault(); }, {passive:false});
 
+  syncStartFromDiary();
   syncLoad('days');
   setMode('start');
 })();
