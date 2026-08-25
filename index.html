@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitaminD Kinetik v3.7</title>
+<title>VitaminD Kinetik v4.3</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -60,6 +60,23 @@
   #meineDaten{background:#10151c;border:1px solid var(--line);border-radius:11px;padding:8px 12px;margin-top:2px}
   #meineDaten .t{font-size:11px;color:var(--dim)}
   #meineDaten .v{font-size:13px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+  #viewStart.locked .qcard,#viewStart.locked #meineDaten{opacity:.35;pointer-events:none}
+  #c0row{display:grid;grid-template-columns:1fr 96px auto;gap:8px;align-items:center;
+    margin:3px 0 7px}
+  #c0lab{font-size:12px;color:var(--dim)}
+  #c0ok{display:none;height:36px;padding:0 12px;background:#1c2128;
+    border:1px solid var(--amber);border-radius:9px;color:var(--amber);
+    font-size:12.5px;font-weight:700;font-family:inherit;white-space:nowrap}
+  #viewStart.locked #c0ok{display:block}
+  .wheel.roll{position:relative;overflow:hidden;padding:0;justify-content:center}
+  .wheel.roll .pv{position:absolute;left:0;right:0;text-align:center;
+    font-variant-numeric:tabular-nums;pointer-events:none}
+  .wheel.roll .prev{top:-6px;height:14px;line-height:14px;font-size:11px;color:#5a646e}
+  .wheel.roll .cur{top:9px;height:18px;line-height:18px;font-size:15px;font-weight:700;color:var(--fg)}
+  .wheel.roll .next{top:28px;height:14px;line-height:14px;font-size:11px;color:#5a646e}
+  #startHint{display:none;margin-top:7px;padding:8px 11px;border-radius:10px;
+    background:#1c2128;border:1px solid #58a6ff;color:#58a6ff;font-size:11.5px;line-height:1.35}
+  #startHint.on{display:block}
   #viewDiary{flex:1 1 auto;min-height:0;display:none;flex-direction:column}
   .din{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:6px;height:38px;margin-bottom:6px}
   .din input{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--fg);
@@ -104,8 +121,11 @@
   .drow{display:grid;grid-template-columns:1.1fr 1fr 0.9fr 0.9fr auto;gap:5px;height:34px;align-items:center;
     border-bottom:1px solid var(--line);font-size:13px;font-variant-numeric:tabular-nums}
   .drow button{background:none;border:none;color:var(--red,#f08080);font-size:15px;width:42px;font-family:inherit}
-  #dsum{flex:0 0 auto;height:34px;display:flex;align-items:center;justify-content:space-between;
-    font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;border-top:1px solid var(--line)}
+  #dsum{flex:0 0 auto;height:34px;display:grid;grid-template-columns:auto 1fr 62px;gap:6px;
+    align-items:center;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;
+    border-top:1px solid var(--line)}
+  #dsumR{text-align:right}
+  #dExp{width:62px;justify-self:end}
   #dnote{flex:0 0 auto;font-size:9px;color:var(--dim);height:14px;overflow:hidden}
   #dExp{background:none;border:1px solid var(--line);border-radius:6px;color:var(--dim);
     font-size:10px;font-family:inherit;padding:3px 8px}
@@ -169,7 +189,7 @@
   .ctl{height:40px;display:flex;flex-direction:column;justify-content:center}
   .ctl.off{display:none}
   .ctl .row{display:flex;justify-content:space-between;align-items:baseline;height:16px}
-  .ctl .name{font-size:12px;color:var(--dim)}
+  .ctl .name{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #btnToday{background:#1c2128;border:1px solid #58a6ff;border-radius:6px;color:#58a6ff;
     font-size:10.5px;font-family:inherit;padding:1px 6px;margin-left:5px;display:none;
     font-variant-numeric:tabular-nums}
@@ -201,7 +221,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitaminD Kinetik<small>v3.7</small></h1>
+  <h1>VitaminD Kinetik<small>v4.3</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -217,10 +237,9 @@
 </div>
 
 <div id="viewStart">
-  <div id="wheelLab"><span>Körpergewicht</span><span>Startwert</span><span>Sonne/Nahrung</span></div>
-  <div id="wheelRow">
+  <div id="wheelLab" style="grid-template-columns:1fr 1fr"><span>Körpergewicht</span><span>Sonne/Nahrung</span></div>
+  <div id="wheelRow" style="grid-template-columns:1fr 1fr">
     <div class="wheel" id="whW"><span id="whWTxt">–</span><span class="arr">▲<br>▼</span></div>
-    <div class="wheel" id="whC"><span id="whCTxt">–</span><span class="arr">▲<br>▼</span></div>
     <div class="wheel" id="whE"><span id="whETxt">–</span><span class="arr">▲<br>▼</span></div>
   </div>
   <div class="ctl" style="height:42px">
@@ -236,7 +255,17 @@
   <div class="qcard" id="cardC"><div class="bar" style="background:#58a6ff"></div>
     <div class="q">Was, wenn ich aufhöre?</div><div class="a" id="ccV" style="color:#58a6ff">–</div>
     <div class="s" id="ccS">–</div><div class="ch">›</div></div>
+  <div id="c0row">
+    <span id="c0lab">Startwert ng/ml</span>
+    <div class="wheel roll" id="c0roll">
+      <span class="pv prev" id="c0p1">–</span>
+      <span class="pv cur"  id="c0cur">–</span>
+      <span class="pv next" id="c0n1">–</span>
+    </div>
+    <button id="c0ok" type="button">übernehmen</button>
+  </div>
   <div id="meineDaten"><div class="t">Modell &amp; Feineinstellungen ›</div><div class="v" id="mdV">–</div></div>
+  <div id="startHint">Oder Messwert samt Einnahmen im Tagebuch führen — dann rechnet die App den aktuellen Wert selbst ›</div>
 </div>
 
 <div id="scroller">
@@ -281,12 +310,12 @@
     <input type="range" id="sST" min="0" max="115" step="1" value="60">
   </div>
   <div class="ctl c-extra">
-    <div class="row"><span class="name">Sonne/Nahrung (1 Sonnenbad ≈ 19.500 IE)</span><span class="value" id="vE">0 IE</span></div>
+    <div class="row"><span class="name">Sonne/Nahrung</span><span class="value" id="vE">0 IE</span></div>
     <input type="range" id="sE" min="0" max="10000" step="100" value="0">
   </div>
   <div class="ctl c-c0">
-    <div class="row"><span class="name">Startwert <button id="btnToday" type="button">–</button></span><span class="value" id="vC">26 ng/ml</span></div>
-    <input type="range" id="sC" min="0" max="100" step="1" value="26">
+    <div class="row"><span class="name">Startwert <button id="btnToday" type="button">–</button></span><span class="value" id="vC">20 ng/ml</span></div>
+    <input type="range" id="sC" min="0" max="100" step="1" value="20">
   </div>
 </div>
 
@@ -312,7 +341,7 @@
   <div id="dchartWrap"><svg id="dchart" viewBox="0 0 360 150" preserveAspectRatio="none"></svg></div>
   <div class="dhead"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3</span><span>≈ ng/ml</span><span></span></div>
   <div id="dlist"></div>
-  <div id="dsum"><span id="dsumL">0 Einträge</span><span><span id="dsumR"></span> <button id="dExp" type="button">Export</button></span></div>
+  <div id="dsum"><span id="dsumL">0 Einträge</span><span id="dsumR"></span><button id="dExp" type="button">Export</button></div>
   <div id="dnote">…</div>
 </div>
 
@@ -497,7 +526,10 @@
     }
 
     if (m.plateau <= ymax){
-      s+='<line x1="'+ML+'" y1="'+sy(m.plateau)+'" x2="'+(VW-MR)+'" y2="'+sy(m.plateau)+'" stroke="#f0a500" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.7"/>';
+      var yP = sy(m.plateau);
+      s+='<line x1="'+ML+'" y1="'+yP+'" x2="'+(VW-MR)+'" y2="'+yP+'" stroke="#f0a500" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.7"/>';
+      var yLab = (m.plateau > ymax*0.92) ? yP+11 : yP-4;      // nahe der Oberkante darunter setzen
+      s+='<text x="'+(ML+5)+'" y="'+yLab+'" fill="#f0a500" font-size="10.5" font-weight="700">'+fmt1(m.plateau)+' ng/ml</text>';
     } else if (scrubT === null){
       s+='<text x="'+(ML+6)+'" y="'+(MT+12)+'" fill="#f0a500" font-size="10" font-weight="600">Plateau '+fmt1(m.plateau)+' ng/ml &#8211; au&#223;erhalb der Skala</text>';
     }
@@ -692,11 +724,10 @@
       }
       var nLong = Math.min(30, span), nShort = Math.min(7, span);
       if (span<=7){
-        avgTxt = '\u00d8 alle '+span+' d: '+fmtInt(Math.round(avgOver(span)/100)*100)+' IE/d';
+        avgTxt = '\u00d8'+span+'d '+fmtInt(Math.round(avgOver(span)/100)*100)+' IE/d';
       } else {
         avgTxt = '\u00d87 '+fmtInt(Math.round(avgOver(nShort)/100)*100)+
-          ' \u00b7 '+(span<30 ? '\u00d8 alle '+nLong : '\u00d830')+' '+
-          fmtInt(Math.round(avgOver(nLong)/100)*100)+' IE/d';
+          ' \u00b7 \u00d8'+nLong+' '+fmtInt(Math.round(avgOver(nLong)/100)*100)+' IE/d';
       }
     }
     if (lv && lv.today !== null && lv.today !== undefined){
@@ -707,7 +738,7 @@
     } else {
       $('dHalt').textContent = '';
     }
-    $('dsumL').textContent = diary.length+' Eintr\u00e4ge \u00b7 \u03a93 '+fmtInt(so)+' mg';
+    $('dsumL').textContent = diary.length+' Eintr.';
     $('dnote').textContent = storageOk
       ? 'gespeichert auf diesem Ger\u00e4t (localStorage)'
       : 'Vorschau: nur diese Sitzung \u2013 auf GitHub Pages wird dauerhaft gespeichert';
@@ -829,6 +860,11 @@
     for (var wi=0; wi<wheels.length; wi++) wheels[wi].show();
     refreshTodayBtn();
     var kEff = fVH(m.plateau)/V;
+    var haveDiary = (todayLevel() !== null);
+    var locked = !haveDiary && !startConfirmed;
+    $('viewStart').className = locked ? 'locked' : '';
+    $('startHint').className = locked ? 'on' : '';
+    showRoll();
     $('mdV').textContent = 'V '+Math.round(V)+' \u00b7 HWZ bei '+fmt1(m.plateau)+' \u2248 '+fmtInt(LN2/kEff)+' d';
 
     $('plateauHead').textContent = 'Plateau '+fmt1(m.plateau)+' ng/ml';
@@ -928,8 +964,33 @@
     return w;
   }
   makeWheel('whW','whWTxt', sW, 1, ' kg');
-  makeWheel('whC','whCTxt', sC, 1, ' ng/ml');
   makeWheel('whE','whETxt', sE, 100, ' IE');
+
+  // Rollrad fuer den Startwert: Nachbarwerte bleiben sichtbar
+  var startConfirmed = false;
+  function showRoll(){
+    var v = +sC.value, lo = +sC.min, hi = +sC.max;
+    function at(d){ var x=v+d; return (x<lo||x>hi) ? '' : String(x); }
+    $('c0p1').textContent = at(-1);
+    $('c0cur').textContent = String(v);
+    $('c0n1').textContent = at(1);
+  }
+  var rollDrag=false, rY0=0, rV0=0;
+  $('c0roll').addEventListener('touchstart', function(){ rollDrag=true; }, {passive:true});
+  $('c0roll').addEventListener('pointerdown', function(ev){
+    rollDrag=true; rY0=ev.clientY; rV0=+sC.value; ev.preventDefault();
+  });
+  document.addEventListener('pointermove', function(ev){
+    if (!rollDrag) return;
+    var steps = Math.round((rY0 - ev.clientY)/16);
+    var v = Math.max(+sC.min, Math.min(+sC.max, rV0 + steps));
+    if (v !== +sC.value){ sC.value = String(v); showRoll(); syncLoad('days'); render(); }
+  });
+  document.addEventListener('pointerup', function(){ rollDrag=false; });
+  document.addEventListener('pointercancel', function(){ rollDrag=false; });
+  document.addEventListener('touchend', function(){ rollDrag=false; }, {passive:true});
+  document.addEventListener('touchmove', function(ev){ if (rollDrag) ev.preventDefault(); }, {passive:false});
+  onTap($('c0ok'), function(){ startConfirmed = true; render(); });
   document.addEventListener('pointermove', function(ev){
     if (!activeWheel) return;
     var sl = activeWheel.slider;
@@ -969,11 +1030,15 @@
   });
 
   $('tabStart').addEventListener('click', function(){ setMode('start'); });
-  $('tabVerlauf').addEventListener('click', function(){ setMode('verlauf'); });
+  $('tabVerlauf').addEventListener('click', function(){
+    if (todayLevel()===null && !startConfirmed){ setMode('start'); return; }
+    setMode('verlauf');
+  });
   onTap($('cardA'), function(){ setMode('verlauf'); });
   onTap($('cardB'), function(){ if(!loadOn){ loadOn=true; syncLoad('days'); } setMode('verlauf'); });
   onTap($('cardC'), function(){ if(!stopOn){ stopOn=true; } setMode('verlauf'); });
   onTap($('meineDaten'), function(){ $('mdl').className = 'show'; });
+  onTap($('startHint'), function(){ setMode('diary'); });
   onTap($('formel'), function(){ $('mdl').className = 'show'; });
   onTap($('mdlClose'), function(){ $('mdl').className = ''; });
   sD2.addEventListener('input', function(){ sD.value = sD2.value; syncLoad('days'); render(); });
