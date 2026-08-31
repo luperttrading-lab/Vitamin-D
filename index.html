@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>VitaminD Kinetik v4.3</title>
+<title>VitaminD Kinetik v4.5</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -111,11 +111,15 @@
   #dlist{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
   #dinfo{flex:0 0 auto;position:sticky;top:0;z-index:6;background:var(--bg);
     border-bottom:1px solid var(--line);height:24px;line-height:24px;margin-bottom:6px;
-    display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;
-    font-variant-numeric:tabular-nums;padding:0 2px}
+    display:grid;grid-template-columns:auto 1fr auto;gap:8px;font-size:12.5px;font-weight:600;
+    font-variant-numeric:tabular-nums;padding:0 2px;white-space:nowrap}
+  #dStartInfo{color:var(--dim);font-weight:500;font-size:11.5px}
+  #dToday{text-align:center}
+  #c0edit{display:none}
+  #c0edit.on{display:block}
   #dToday{color:var(--amber)}
   #dHalt{color:#7ee2a8}
-  #dchartWrap{flex:0 0 auto;height:150px;position:relative;margin-bottom:8px;display:none}
+  #dchartWrap{flex:0 0 auto;height:196px;position:relative;margin-bottom:8px;display:none}
   #dchartWrap.on{display:block}
   #dchart{position:absolute;inset:0;width:100%;height:100%;display:block}
   .drow{display:grid;grid-template-columns:1.1fr 1fr 0.9fr 0.9fr auto;gap:5px;height:34px;align-items:center;
@@ -221,7 +225,7 @@
 <div id="bgfix"></div>
 
 <header>
-  <h1>VitaminD Kinetik<small>v4.3</small></h1>
+  <h1>VitaminD Kinetik<small>v4.5</small></h1>
   <div id="plateauHead">–</div>
 </header>
 
@@ -322,13 +326,15 @@
 </div>
 
 <div id="viewDiary">
+  <div id="c0edit">
   <div class="dhead" style="grid-template-columns:1fr 1.25fr 1.15fr;padding-bottom:2px">
-    <span>Messwert [ng/ml]</span><span>Startdatum</span><span style="text-align:right">heute</span>
+    <span>Messwert [ng/ml]</span><span>Startdatum</span><span></span>
   </div>
   <div id="dstart">
     <input type="text" id="diC0" inputmode="decimal" placeholder="z. B. 26,5" autocomplete="off">
     <div id="diC0Date"><span id="diC0DateTxt">–</span><span class="arr">▲<br>▼</span></div>
     <button id="diC0Set" type="button">setzen</button>
+  </div>
   </div>
   <div class="dhead" style="padding-bottom:2px"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3 [mg]</span><span></span></div>
   <div class="din">
@@ -337,7 +343,7 @@
     <input type="text" id="diO" inputmode="numeric" placeholder="z. B. 2.000" autocomplete="off">
     <button id="diAdd" type="button">+</button>
   </div>
-  <div id="dinfo"><span id="dToday">heute ≈ –</span><span id="dHalt"></span></div>
+  <div id="dinfo"><span id="dStartInfo">Start –</span><span id="dToday">heute ≈ –</span><span id="dHalt"></span></div>
   <div id="dchartWrap"><svg id="dchart" viewBox="0 0 360 150" preserveAspectRatio="none"></svg></div>
   <div class="dhead"><span>Datum</span><span>Vitamin D [IE]</span><span>Omega-3</span><span>≈ ng/ml</span><span></span></div>
   <div id="dlist"></div>
@@ -667,7 +673,6 @@
     s+='<circle cx="'+px(0)+'" cy="'+py(lv.levels[days[0]])+'" r="3" fill="#f0a500"/>';
     var last=days.length-1;
     s+='<circle cx="'+px(last)+'" cy="'+py(lv.levels[days[last]])+'" r="4" fill="#f0a500" stroke="#0d1117" stroke-width="1.2"/>';
-    s+='<text x="'+(W-MR)+'" y="'+(MT+10)+'" text-anchor="end" fill="#e6edf3" font-size="11" font-weight="600">'+fmt1(lv.levels[days[last]])+' ng/ml</text>';
     s+='<text class="ticktext" x="'+ML+'" y="'+(H-4)+'" text-anchor="start">'+fmtDate(days[0])+'</text>';
     s+='<text class="ticktext" x="'+(W-MR)+'" y="'+(H-4)+'" text-anchor="end">'+fmtDate(days[last])+'</text>';
     svg.innerHTML=s;
@@ -691,10 +696,14 @@
     }
     $('dlist').innerHTML = out;
     // Startzeile + Heute
+    $('dStartInfo').textContent = c0set
+      ? 'Start '+c0set.v.toLocaleString('de-DE')+' \u270e'
+      : 'Start setzen \u270e';
+    if (!c0set) $('c0edit').className = 'on';       // ohne Startwert immer offen
     if (c0set){
       $('diC0Set').className='set';
       $('diC0Set').textContent = c0set.v.toLocaleString('de-DE')+' @ '+fmtDate(c0set.date);
-      $('dToday').textContent = (lv && lv.today!==null && lv.today!==undefined) ? 'heute \u2248 '+fmt1(lv.today) : '\u2013';
+      $('dToday').textContent = (lv && lv.today!==null && lv.today!==undefined) ? 'heute \u2248 '+fmt1(lv.today)+' ng/ml' : '\u2013';
     } else {
       $('diC0Set').className='';
       $('diC0Set').textContent = 'setzen';
@@ -734,7 +743,7 @@
       var wq=+sW.value, Vq=+sV.value, hq=+sH.value;
       var kq = vhOn ? fVH(lv.today)/Vq : LN2/hq;
       var ieTag = kq*lv.today*Vq*wq;
-      $('dHalt').textContent = 'halten \u2248 '+fmtInt(Math.round(ieTag/100)*100)+' IE/d';
+      $('dHalt').textContent = 'halten '+fmtInt(Math.round(ieTag/100)*100)+' IE/d';
     } else {
       $('dHalt').textContent = '';
     }
@@ -1157,11 +1166,16 @@
     return (isFinite(v) && v>0) ? Math.round(v*10)/10 : 0;
   }
   $('diC0').addEventListener('input', function(){ decFormat($('diC0')); });
+  onTap($('dStartInfo'), function(){
+    $('c0edit').className = ($('c0edit').className==='on') ? '' : 'on';
+  });
   onTap($('diC0Set'), function(){
     var v = parseDec($('diC0'));
     if (v>0){ c0set={v:v, date:c0DateISO}; $('diC0').value=''; }
     else if (c0set){ c0set=null; }         // leer + Tipp = Start loeschen
-    c0Save(); syncStartFromDiary(); syncLoad('days'); renderDiary();
+    c0Save();
+    if (c0set) $('c0edit').className = '';          // gesetzt -> Zeile einklappen
+    syncStartFromDiary(); syncLoad('days'); renderDiary();
   });
   onTap($('dExp'), function(){
     $('ovlTxt').value = diaryCSV();
